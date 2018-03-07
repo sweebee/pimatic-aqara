@@ -1,24 +1,22 @@
 {
-  "name": "pimatic-xiaomi-aqara",
+  "name": "pimatic-aqara",
   "description": "Control the xiaomi-aqara gateway",
   "author": "Wiebe Nieuwenhuis <info@wiebenieuwenhuis.nl> (http://wiebenieuwenhuis.nl)",
-  "main": "xiaomi-aqara",
+  "main": "aqara",
   "files": [
-    "xiaomi-aqara.coffee",
+    "aqara.coffee",
     "README.md",
-    "xiaomi-aqara-config-schema.coffee"
+    "aqara-config-schema.coffee",
+    "device-config-schema.coffee"
   ],
   "version": "0.1.0",
   "homepage": "http://wiebenieuwenhuis.nl",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/sweebee/pimatic-xiaomi-aqara.git"
+    "url": "git://github.com/sweebee/pimatic-aqara.git"
   },
-  "configSchema": "xiaomi-aqara-config-schema.coffee",
-  "dependencies": {
-    "lumi-aqara": "^1.4.0"
-  },
+  "configSchema": "aqara-config-schema.coffee",
   "peerDependencies": {
     "pimatic": "0.8.*"
   },
