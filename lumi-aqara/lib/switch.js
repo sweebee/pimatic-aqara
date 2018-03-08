@@ -26,7 +26,11 @@ var Switch = function (_Subdevice) {
     value: function _handleState(state) {
       _get(Switch.prototype.__proto__ || Object.getPrototypeOf(Switch.prototype), '_handleState', this).call(this, state);
 
-      if (typeof state.status === 'undefined') return; // might be no_close
+      if (typeof state.status === 'undefined' && typeof state.channel_0 === 'undefined') return; // might be no_close
+
+      if(typeof state.status === 'undefined'){
+        state.status = state.channel_0;
+      }
 
       switch (state.status) {
         case 'click':

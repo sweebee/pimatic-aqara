@@ -116,6 +116,9 @@ var Gateway = function (_events$EventEmitter) {
                 subdevice = new Magnet({ sid });
                 break;
               case 'switch':
+              case '86sw1':
+                subdevice = new Switch({ sid });
+                break;
               case 'sensor_switch.aq2':
                 subdevice = new Switch({ sid });
                 break;

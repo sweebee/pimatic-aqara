@@ -59,15 +59,19 @@ module.exports = (env) ->
               )
             when 'switch'
               device.on('click', () =>
+                device.state = 'click'
                 @emit "switch", device
               )
               device.on('doubleClick', () =>
+                device.state = 'doubleClick'
                 @emit "switch", device
               )
               device.on('longClickPress', () =>
+                device.state = 'longClickPress'
                 @emit "switch", device
               )
               device.on('longClickRelease', () =>
+                device.state = 'longClickRelease'
                 @emit "switch", device
               )
         )
@@ -289,12 +293,19 @@ module.exports = (env) ->
         type: "string"
       }
 
+      resetState = ( =>
+        @_state = 'waiting...'
+        @emit "state", @_state
+      )
+
       @rfValueEventHandler = ( (result) =>
-        env.logger.info(result)
         if result.getSid() is @config.SID
-          #todo: set state
+          @_state = result.state
+          @emit "state", @_state
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
+          clearTimeout(@_resetStateTimeout)
+          @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
       )
 
       @board.on("switch", @rfValueEventHandler)

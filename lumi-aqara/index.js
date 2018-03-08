@@ -113,6 +113,8 @@ var Aqara = function (_events$EventEmitter) {
       }
 
       if (!handled) {
+
+
         // propagate to gateways
         var _iteratorNormalCompletion2 = true;
         var _didIteratorError2 = false;

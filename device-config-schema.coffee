@@ -38,5 +38,8 @@ module.exports = {
       SID:
         type: "string"
         required: true
+      resetTime:
+        type: "integer"
+        default: 5000
   }
 }
