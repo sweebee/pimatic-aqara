@@ -16,7 +16,6 @@ module.exports = (env) ->
       env.logger.debug("Searching for gateway...")
       @driver.on('gateway', (gateway) =>
         env.logger.debug("Gateway discovered")
-        @emit "discovered", gateway
 
         # Gateway ready
         gateway.on('ready', () =>
@@ -31,19 +30,46 @@ module.exports = (env) ->
 
         gateway.on('subdevice', (device) =>
           env.logger.debug(device)
-
-          device.on('motion', () =>
-            @emit "motion", device
-          )
-
-          device.on('noMotion', () =>
-            @emit "motion", device
-          )
-
-          device.on('leak', () =>
-            @emit "leak", device
-          )
-
+          switch device.getType()
+            when 'magnet'
+              device.on('open', () =>
+                @emit "magnet", device
+              )
+              device.on('close', () =>
+                @emit "magnet", device
+              )
+            when 'motion'
+              device.on('motion', () =>
+                @emit "motion", device
+              )
+              device.on('noMotion', () =>
+                @emit "motion", device
+              )
+            when 'leak'
+              device.on('update', () =>
+                @emit "leak", device
+              )
+            when 'sensor'
+              device.on('update', () =>
+                @emit "sensor", device
+              )
+            when 'cube'
+              device.on('update', () =>
+                @emit "cube", device
+              )
+            when 'switch'
+              device.on('click', () =>
+                @emit "switch", device
+              )
+              device.on('doubleClick', () =>
+                @emit "switch", device
+              )
+              device.on('longClickPress', () =>
+                @emit "switch", device
+              )
+              device.on('longClickRelease', () =>
+                @emit "switch", device
+              )
         )
       )
 
@@ -60,6 +86,7 @@ module.exports = (env) ->
 
       deviceClasses = [
         AqaraMotionSensor,
+        AqaraDoorSensor,
         AqaraLeakSensor
       ]
 
@@ -78,8 +105,8 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_presence = lastState?.presence?.value or false
-      @_battery = lastState?.battery?.value or 0
-      @_lux = lastState?.lux?.value or 0
+      @_battery = lastState?.battery?.value
+      @_lux = lastState?.lux?.value
 
       @addAttribute('battery', {
         description: "Battery",
@@ -140,13 +167,13 @@ module.exports = (env) ->
     getLux: -> Promise.resolve @_lux
 
 
-  class AqaraLeakSensor extends env.devices.PresenceSensor
+  class AqaraDoorSensor extends env.devices.ContactSensor
 
     constructor: (@config, lastState, @board) ->
       @id = @config.id
       @name = @config.name
-      @_presence = lastState?.presence?.value or false
-      @_battery = lastState?.battery?.value or 0
+      @_contact = lastState?.contact?.value or false
+      @_battery = lastState?.battery?.value
 
       @addAttribute('battery', {
         description: "Battery",
@@ -167,9 +194,51 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
-      resetPresence = ( =>
-        @_setPresence(no)
+      @rfValueEventHandler = ( (result) =>
+        env.logger.info(result)
+        if result.getSid() is @config.SID
+          @_setContact(result.isOpen())
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
       )
+
+      @board.on("magnet", @rfValueEventHandler)
+
+      super()
+
+    destroy: ->
+      @board.removeListener "leak", @rfValueEventHandler
+      super()
+
+    getContact: -> Promise.resolve @_contact
+    getBattery: -> Promise.resolve @_battery
+
+  class AqaraLeakSensor extends env.devices.PresenceSensor
+
+    constructor: (@config, lastState, @board) ->
+      @id = @config.id
+      @name = @config.name
+      @_presence = lastState?.presence?.value or false
+      @_battery = lastState?.battery?.value
+
+      @addAttribute('battery', {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      })
+      @['battery'] = ()-> Promise.resolve(@_battery)
 
       @rfValueEventHandler = ( (result) =>
         env.logger.info(result)
