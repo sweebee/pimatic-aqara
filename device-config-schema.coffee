@@ -1,5 +1,5 @@
 module.exports = {
-  title: "pimatic-z-aqara device config options"
+  title: "pimatic-aqara device config options"
   AqaraMotionSensor: {
     title: "AqaraMotionSensor config options"
     type: "object"
