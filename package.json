@@ -10,7 +10,7 @@
     "aqara-config-schema.coffee",
     "device-config-schema.coffee"
   ],
-  "version": "0.2.2",
+  "version": "0.2.3",
   "homepage": "http://wiebenieuwenhuis.nl",
   "repository": {
     "type": "git",
