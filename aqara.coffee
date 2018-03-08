@@ -7,7 +7,7 @@ module.exports = (env) ->
 
   class Board extends events.EventEmitter
 
-    constructor: (framework,config) ->
+    constructor: (framework, config) ->
       @config = config
       @framework = framework
 
@@ -16,6 +16,7 @@ module.exports = (env) ->
       env.logger.debug("Searching for gateway...")
       @driver.on('gateway', (gateway) =>
         env.logger.debug("Gateway discovered")
+        @emit "discovered", gateway
 
         # Gateway ready
         gateway.on('ready', () =>
@@ -34,10 +35,13 @@ module.exports = (env) ->
             @emit "rfValue", device
           )
           device.on('noMotion', () =>
-            @emit "rfValue", device
+            @_rfsendtoboard(device)
           )
         )
       )
+
+    _rfsendtoboard: (device) ->
+      @emit "rfValue", device
 
   Promise.promisifyAll(Board.prototype)
 
@@ -45,15 +49,23 @@ module.exports = (env) ->
 
     init: (app, @framework, @config) =>
 
+      @board = new Board(@framework, @config)
+
       #Register devices
       deviceConfigDef = require("./device-config-schema.coffee")
 
-      @framework.deviceManager.registerDeviceClass("AqaraMotionSensor", {
-        configDef: deviceConfigDef.AqaraMotionSensor,
-        createCallback: (config) => new AqaraMotionSensor(config)
-      })
+      deviceClasses = [
+        AqaraMotionSensor
+      ]
 
-      @board = new Board(@framework, @config)
+      for Cl in deviceClasses
+        do (Cl) =>
+          @framework.deviceManager.registerDeviceClass(Cl.name, {
+            configDef: deviceConfigDef[Cl.name]
+            createCallback: (config,lastState) =>
+              device  =  new Cl(config,lastState, @board)
+              return device
+          })
 
   class AqaraMotionSensor extends env.devices.PresenceSensor
 
