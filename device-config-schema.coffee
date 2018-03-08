@@ -3,7 +3,7 @@ module.exports = {
   AqaraMotionSensor: {
     title: "AqaraMotionSensor config options"
     type: "object"
-    extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
+    extensions: ["xPresentLabel", "xAbsentLabel"]
     properties:
       SID:
         type: "string"
@@ -15,7 +15,7 @@ module.exports = {
   AqaraDoorSensor: {
     title: "AqaraDoorSensor config options"
     type: "object"
-    extensions: ["xLink", "xClosedLabel", "xOpenedLabel"]
+    extensions: ["xClosedLabel", "xOpenedLabel"]
     properties:
       SID:
         type: "string"
@@ -24,16 +24,20 @@ module.exports = {
   AqaraLeakSensor: {
     title: "AqaraLeakSensor config options"
     type: "object"
-    extensions: ["xLink", "xPresentLabel", "xAbsentLabel"]
     properties:
       SID:
         type: "string"
         required: true
+      Wet:
+        type: "string"
+        default: "wet"
+      Dry:
+        type: "string"
+        default: "dry"
   }
   AqaraWirelessSwitch: {
     title: "AqaraWirelessSwitch config options"
     type: "object"
-    extensions: ["xLink"]
     properties:
       SID:
         type: "string"
@@ -42,7 +46,6 @@ module.exports = {
   AqaraWirelessButton: {
     title: "AqaraWirelessSwitch config options"
     type: "object"
-    extensions: ["xLink"]
     properties:
       SID:
         type: "string"

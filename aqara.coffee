@@ -259,15 +259,17 @@ module.exports = (env) ->
     getContact: -> Promise.resolve @_contact
     getBattery: -> Promise.resolve @_battery
 
-  class AqaraLeakSensor extends env.devices.PresenceSensor
+  class AqaraLeakSensor extends env.devices.Device
 
     constructor: (@config, lastState, @board) ->
       @id = @config.id
       @name = @config.name
-      @_presence = lastState?.presence?.value or false
+      @_state = lastState?.state?.value or false
       @_battery = lastState?.battery?.value
 
-      @addAttribute('battery', {
+      @attributes = {}
+
+      @attributes.battery = {
         description: "Battery",
         type: "number"
         displaySparkline: false
@@ -283,12 +285,18 @@ module.exports = (env) ->
             'icon-battery-fuel-5': [80, 100]
             'icon-battery-filled': 100
           }
-      })
-      @['battery'] = ()-> Promise.resolve(@_battery)
+      }
+
+      @attributes.state = {
+        description: "State of the remote"
+        type: "boolean"
+        labels: [@config.Wet, @config.Dry]
+      }
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_setPresence(result.isLeaking())
+          @_state = result.isLeaking()
+          @emit "state", @_state
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
@@ -301,7 +309,7 @@ module.exports = (env) ->
       @board.removeListener "leak", @rfValueEventHandler
       super()
 
-    getPresence: -> Promise.resolve @_presence
+    getState: -> Promise.resolve @_state
     getBattery: -> Promise.resolve @_battery
 
   class AqaraWirelessSwitch extends env.devices.PowerSwitch
