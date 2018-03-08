@@ -11,6 +11,8 @@ module.exports = (env) ->
       @config = config
       @framework = framework
 
+      @devices = {}
+
       @driver = new LumiAqara()
 
       env.logger.debug("Searching for gateway...")
@@ -30,6 +32,7 @@ module.exports = (env) ->
 
         gateway.on('subdevice', (device) =>
           env.logger.debug(device)
+          @devices[device._sid] = device
           switch device.getType()
             when 'magnet'
               device.on('open', () =>
@@ -84,6 +87,38 @@ module.exports = (env) ->
     init: (app, @framework, @config) =>
 
       @board = new Board(@framework, @config)
+
+      @framework.deviceManager.on('discover', (eventData) =>
+
+        @framework.deviceManager.discoverMessage(
+          'pimatic-aqara', "Searching for devices"
+        )
+        for key, value of @board.devices
+          SID = key
+
+          newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
+            device.SID is SID
+
+          if newdevice
+            deviceClass = false
+            switch value._type
+              when 'switch'
+                deviceClass = 'AqaraWallRemote'
+              when 'leak'
+                deviceClass = 'AqaraLeakSensor'
+              when 'motion'
+                deviceClass = 'AqaraMotionSensor'
+              when 'magnet'
+                deviceClass = 'AqaraDoorSensor'
+
+            if deviceClass
+              @framework.deviceManager.discoveredDevice(
+                'pimatic-aqara', "#{deviceClass}", {
+                  SID: SID,
+                  class: deviceClass
+                }
+              )
+      )
 
       #Register devices
       deviceConfigDef = require("./device-config-schema.coffee")
