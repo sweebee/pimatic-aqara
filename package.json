@@ -18,10 +18,10 @@
   },
   "configSchema": "aqara-config-schema.coffee",
   "peerDependencies": {
-    "pimatic": "0.8.*"
+    "pimatic": "0.9.*"
   },
   "engines": {
-    "node": ">0.8.x",
+    "node": ">4.5.x",
     "npm": ">1.1.x"
   }
 }

@@ -253,7 +253,7 @@ module.exports = (env) ->
       super()
 
     destroy: ->
-      @board.removeListener "leak", @rfValueEventHandler
+      @board.removeListener "magnet", @rfValueEventHandler
       super()
 
     getContact: -> Promise.resolve @_contact
