@@ -30,18 +30,22 @@ module.exports = (env) ->
         )
 
         gateway.on('subdevice', (device) =>
-          env.logger.info(device)
+          env.logger.debug(device)
+
           device.on('motion', () =>
-            @emit "rfValue", device
+            @emit "motion", device
           )
+
           device.on('noMotion', () =>
-            @_rfsendtoboard(device)
+            @emit "motion", device
           )
+
+          device.on('leak', () =>
+            @emit "leak", device
+          )
+
         )
       )
-
-    _rfsendtoboard: (device) ->
-      @emit "rfValue", device
 
   Promise.promisifyAll(Board.prototype)
 
@@ -55,7 +59,8 @@ module.exports = (env) ->
       deviceConfigDef = require("./device-config-schema.coffee")
 
       deviceClasses = [
-        AqaraMotionSensor
+        AqaraMotionSensor,
+        AqaraLeakSensor
       ]
 
       for Cl in deviceClasses
@@ -108,21 +113,84 @@ module.exports = (env) ->
       )
 
       @rfValueEventHandler = ( (result) =>
-        env.logger.debug(result)
+        env.logger.info(result)
+        if result.getSid() is @config.SID
+          @_setPresence(result._motion)
+          clearTimeout(@_resetPresenceTimeout)
+          @_resetPresenceTimeout = setTimeout(( =>
+            @_setPresence(no)
+          ), @config.resetTime)
+
+          @_lux = parseInt(result.getLux())
+          @emit "lux", @_lux
+
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
       )
 
-      @board.on("rfValue", @rfValueEventHandler)
+      @board.on("motion", @rfValueEventHandler)
 
       super()
 
     destroy: ->
       clearTimeout(@_resetPresenceTimeout)
-      @board.removeListener "rfValue", @rfValueEventHandler
+      @board.removeListener "motion", @rfValueEventHandler
       super()
 
     getPresence: -> Promise.resolve @_presence
     getBattery: -> Promise.resolve @_battery
     getLux: -> Promise.resolve @_lux
+
+
+  class AqaraLeakSensor extends env.devices.PresenceSensor
+
+    constructor: (@config, lastState, @board) ->
+      @id = @config.id
+      @name = @config.name
+      @_presence = lastState?.presence?.value or false
+      @_battery = lastState?.battery?.value or 0
+
+      @addAttribute('battery', {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      })
+      @['battery'] = ()-> Promise.resolve(@_battery)
+
+      resetPresence = ( =>
+        @_setPresence(no)
+      )
+
+      @rfValueEventHandler = ( (result) =>
+        env.logger.info(result)
+        if result.getSid() is @config.SID
+          @_setPresence(result.isLeaking())
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
+      )
+
+      @board.on("leak", @rfValueEventHandler)
+
+      super()
+
+    destroy: ->
+      @board.removeListener "leak", @rfValueEventHandler
+      super()
+
+    getPresence: -> Promise.resolve @_presence
+    getBattery: -> Promise.resolve @_battery
 
 
   aqara = new aqara
