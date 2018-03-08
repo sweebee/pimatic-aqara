@@ -2,26 +2,19 @@ module.exports = (env) ->
 
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
+  events = env.require 'events'
   LumiAqara = require './lumi-aqara'
 
-  class aqara extends env.plugins.Plugin
+  class Board extends events.EventEmitter
 
-    init: (app, @framework, @config) =>
+    constructor: (framework,config) ->
+      @config = config
+      @framework = framework
 
-
-      # Register devices
-      deviceConfigDef = require("./device-config-schema.coffee")
-
-      @framework.deviceManager.registerDeviceClass("AqaraMotionSensor", {
-        configDef: deviceConfigDef.AqaraMotionSensor,
-        createCallback: (config) => new AqaraMotionSensor(config)
-      })
-
-
-      connection = new LumiAqara()
+      @driver = new LumiAqara()
 
       env.logger.debug("Searching for gateway...")
-      connection.on('gateway', (gateway) =>
+      @driver.on('gateway', (gateway) =>
         env.logger.debug("Gateway discovered")
 
         # Gateway ready
@@ -32,14 +25,35 @@ module.exports = (env) ->
 
         # Gateway offline
         gateway.on('offline', () =>
-          gateway = null
           env.logger.debug('Gateway is offline')
         )
 
         gateway.on('subdevice', (device) =>
           env.logger.info(device)
+          device.on('motion', () =>
+            @emit "rfValue", device
+          )
+          device.on('noMotion', () =>
+            @emit "rfValue", device
+          )
         )
       )
+
+  Promise.promisifyAll(Board.prototype)
+
+  class aqara extends env.plugins.Plugin
+
+    init: (app, @framework, @config) =>
+
+      #Register devices
+      deviceConfigDef = require("./device-config-schema.coffee")
+
+      @framework.deviceManager.registerDeviceClass("AqaraMotionSensor", {
+        configDef: deviceConfigDef.AqaraMotionSensor,
+        createCallback: (config) => new AqaraMotionSensor(config)
+      })
+
+      @board = new Board(@framework, @config)
 
   class AqaraMotionSensor extends env.devices.PresenceSensor
 
@@ -81,12 +95,17 @@ module.exports = (env) ->
         @_setPresence(no)
       )
 
-      # functions
+      @rfValueEventHandler = ( (result) =>
+        env.logger.debug(result)
+      )
+
+      @board.on("rfValue", @rfValueEventHandler)
 
       super()
 
     destroy: ->
       clearTimeout(@_resetPresenceTimeout)
+      @board.removeListener "rfValue", @rfValueEventHandler
       super()
 
     getPresence: -> Promise.resolve @_presence
