@@ -1,5 +1,5 @@
 module.exports = {
-  title: "my plugin config options"
+  title: "pimatic aqara config options"
   type: "object"
   properties:
     password:
