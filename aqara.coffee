@@ -117,9 +117,7 @@ module.exports = (env) ->
         if result.getSid() is @config.SID
           @_setPresence(result._motion)
           clearTimeout(@_resetPresenceTimeout)
-          @_resetPresenceTimeout = setTimeout(( =>
-            @_setPresence(no)
-          ), @config.resetTime)
+          @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
           @_lux = parseInt(result.getLux())
           @emit "lux", @_lux
