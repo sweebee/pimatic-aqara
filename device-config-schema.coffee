@@ -30,4 +30,13 @@ module.exports = {
         type: "string"
         required: true
   }
+  AqaraWallRemote: {
+    title: "AqaraWallRemote config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      SID:
+        type: "string"
+        required: true
+  }
 }

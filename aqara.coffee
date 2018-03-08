@@ -87,7 +87,8 @@ module.exports = (env) ->
       deviceClasses = [
         AqaraMotionSensor,
         AqaraDoorSensor,
-        AqaraLeakSensor
+        AqaraLeakSensor,
+        AqaraWallRemote
       ]
 
       for Cl in deviceClasses
@@ -95,7 +96,7 @@ module.exports = (env) ->
           @framework.deviceManager.registerDeviceClass(Cl.name, {
             configDef: deviceConfigDef[Cl.name]
             createCallback: (config,lastState) =>
-              device  =  new Cl(config,lastState, @board)
+              device  =  new Cl(config, lastState, @board)
               return device
           })
 
@@ -140,7 +141,6 @@ module.exports = (env) ->
       )
 
       @rfValueEventHandler = ( (result) =>
-        env.logger.info(result)
         if result.getSid() is @config.SID
           @_setPresence(result._motion)
           clearTimeout(@_resetPresenceTimeout)
@@ -195,7 +195,6 @@ module.exports = (env) ->
       @['battery'] = ()-> Promise.resolve(@_battery)
 
       @rfValueEventHandler = ( (result) =>
-        env.logger.info(result)
         if result.getSid() is @config.SID
           @_setContact(result.isOpen())
           @_battery = result.getBatteryPercentage()
@@ -241,7 +240,6 @@ module.exports = (env) ->
       @['battery'] = ()-> Promise.resolve(@_battery)
 
       @rfValueEventHandler = ( (result) =>
-        env.logger.info(result)
         if result.getSid() is @config.SID
           @_setPresence(result.isLeaking())
           @_battery = result.getBatteryPercentage()
@@ -259,6 +257,56 @@ module.exports = (env) ->
     getPresence: -> Promise.resolve @_presence
     getBattery: -> Promise.resolve @_battery
 
+  class AqaraWallRemote extends env.devices.Device
+
+    constructor: (@config, lastState, @board) ->
+      @id = @config.id
+      @name = @config.name
+      @_state = lastState?.state?.value
+      @_battery = lastState?.battery?.value
+      @attributes = {}
+
+      @attributes.battery = {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      }
+
+      @attributes.state = {
+        description: "State of the remote"
+        type: "string"
+      }
+
+      @rfValueEventHandler = ( (result) =>
+        env.logger.info(result)
+        if result.getSid() is @config.SID
+          #todo: set state
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
+      )
+
+      @board.on("switch", @rfValueEventHandler)
+
+      super()
+
+    destroy: ->
+      @board.removeListener "switch", @rfValueEventHandler
+      super()
+
+    getState: -> Promise.resolve @_state
+    getBattery: -> Promise.resolve @_battery
 
   aqara = new aqara
 
