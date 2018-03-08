@@ -40,6 +40,6 @@ module.exports = {
         required: true
       resetTime:
         type: "integer"
-        default: 5000
+        default: 100
   }
 }
