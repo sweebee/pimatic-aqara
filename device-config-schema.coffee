@@ -7,6 +7,7 @@ module.exports = {
     properties:
       SID:
         type: "string"
+        required: true
       resetTime:
         type: "integer"
         default: 30000
@@ -18,6 +19,7 @@ module.exports = {
     properties:
       SID:
         type: "string"
+        required: true
   }
   AqaraLeakSensor: {
     title: "AqaraLeakSensor config options"
@@ -26,5 +28,6 @@ module.exports = {
     properties:
       SID:
         type: "string"
+        required: true
   }
 }
