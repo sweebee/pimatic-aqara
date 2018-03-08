@@ -11,6 +11,14 @@ module.exports = {
         type: "integer"
         default: 30000
   }
+  AqaraDoorSensor: {
+    title: "AqaraDoorSensor config options"
+    type: "object"
+    extensions: ["xLink", "xClosedLabel", "xOpenedLabel"]
+    properties:
+      SID:
+        type: "string"
+  }
   AqaraLeakSensor: {
     title: "AqaraLeakSensor config options"
     type: "object"
