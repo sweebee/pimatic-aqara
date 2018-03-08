@@ -27,7 +27,7 @@ module.exports = (env) ->
 
         # Gateway offline
         gateway.on('offline', () =>
-          env.logger.debug('Gateway is offline')
+          env.logger.warning('Gateway is offline')
         )
 
         gateway.on('subdevice', (device) =>
