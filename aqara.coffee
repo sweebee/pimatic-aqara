@@ -60,6 +60,11 @@ module.exports = (env) ->
               device.on('update', () =>
                 @emit "cube", device
               )
+            when 'button'
+              device.on('click', () =>
+                device.state = 'click'
+                @emit "switch", device
+              )
             when 'switch'
               device.on('click', () =>
                 device.state = 'click'
@@ -103,7 +108,9 @@ module.exports = (env) ->
             deviceClass = false
             switch value._type
               when 'switch'
-                deviceClass = 'AqaraWallRemote'
+                deviceClass = 'AqaraWirelessSwitch'
+              when 'button'
+                deviceClass = 'AqaraWirelessButton'
               when 'leak'
                 deviceClass = 'AqaraLeakSensor'
               when 'motion'
@@ -127,7 +134,8 @@ module.exports = (env) ->
         AqaraMotionSensor,
         AqaraDoorSensor,
         AqaraLeakSensor,
-        AqaraWallRemote
+        AqaraWirelessButton,
+        AqaraWirelessSwitch
       ]
 
       for Cl in deviceClasses
@@ -296,7 +304,55 @@ module.exports = (env) ->
     getPresence: -> Promise.resolve @_presence
     getBattery: -> Promise.resolve @_battery
 
-  class AqaraWallRemote extends env.devices.Device
+  class AqaraWirelessSwitch extends env.devices.PowerSwitch
+
+    constructor: (@config, lastState, @board) ->
+      @id = @config.id
+      @name = @config.name
+      @_state = lastState?.state?.value or false
+      @_battery = lastState?.battery?.value
+
+      @addAttribute('battery', {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      })
+      @['battery'] = ()-> Promise.resolve(@_battery)
+
+      @rfValueEventHandler = ( (result) =>
+        if result.getSid() is @config.SID
+          @_setState(!@_state)
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
+      )
+
+      @board.on("switch", @rfValueEventHandler)
+
+      super()
+
+    changeStateTo: (state) ->
+      @_setState(state)
+
+    destroy: ->
+      @board.removeListener "switch", @rfValueEventHandler
+      super()
+
+    getSate: -> Promise.resolve @_state
+    getBattery: -> Promise.resolve @_battery
+
+  class AqaraWirelessButton extends env.devices.Device
 
     constructor: (@config, lastState, @board) ->
       @id = @config.id
