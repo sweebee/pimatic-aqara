@@ -4,6 +4,7 @@
   "author": "Wiebe Nieuwenhuis <info@wiebenieuwenhuis.nl> (http://wiebenieuwenhuis.nl)",
   "main": "aqara",
   "files": [
+    "lumi-aqara",
     "aqara.coffee",
     "README.md",
     "aqara-config-schema.coffee",
@@ -11,7 +12,6 @@
   ],
   "version": "0.1.0",
   "homepage": "http://wiebenieuwenhuis.nl",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git://github.com/sweebee/pimatic-aqara.git"
