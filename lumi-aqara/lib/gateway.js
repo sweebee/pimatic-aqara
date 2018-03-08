@@ -18,6 +18,7 @@ var _require = require('../constants'),
 
 var Magnet = require('./magnet');
 var Switch = require('./switch');
+var Button = require('./button');
 var Motion = require('./motion');
 var Sensor = require('./sensor');
 var Leak = require('./leak');
@@ -120,7 +121,7 @@ var Gateway = function (_events$EventEmitter) {
                 subdevice = new Switch({ sid });
                 break;
               case 'sensor_switch.aq2':
-                subdevice = new Switch({ sid });
+                subdevice = new Button({ sid });
                 break;
               case 'motion':
               case 'sensor_motion.aq2':

@@ -30,8 +30,17 @@ module.exports = {
         type: "string"
         required: true
   }
-  AqaraWallRemote: {
-    title: "AqaraWallRemote config options"
+  AqaraWirelessSwitch: {
+    title: "AqaraWirelessSwitch config options"
+    type: "object"
+    extensions: ["xLink"]
+    properties:
+      SID:
+        type: "string"
+        required: true
+  }
+  AqaraWirelessButton: {
+    title: "AqaraWirelessSwitch config options"
     type: "object"
     extensions: ["xLink"]
     properties:
@@ -40,6 +49,6 @@ module.exports = {
         required: true
       resetTime:
         type: "integer"
-        default: 5000
+        default: 100
   }
 }
