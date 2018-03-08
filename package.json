@@ -1,6 +1,6 @@
 {
   "name": "pimatic-aqara",
-  "description": "Control the xiaomi-aqara gateway",
+  "description": "Control the aqara (xiaomi) gateway",
   "author": "Wiebe Nieuwenhuis <info@wiebenieuwenhuis.nl> (http://wiebenieuwenhuis.nl)",
   "main": "aqara",
   "files": [
