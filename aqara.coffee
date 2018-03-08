@@ -27,7 +27,7 @@ module.exports = (env) ->
 
         # Gateway offline
         gateway.on('offline', () =>
-          env.logger.warning('Gateway is offline')
+          env.logger.error('Gateway is offline')
         )
 
         gateway.on('subdevice', (device) =>
@@ -63,7 +63,7 @@ module.exports = (env) ->
             when 'button'
               device.on('click', () =>
                 device.state = 'click'
-                @emit "switch", device
+                @emit "button", device
               )
             when 'switch'
               device.on('click', () =>
@@ -399,12 +399,12 @@ module.exports = (env) ->
           @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
       )
 
-      @board.on("switch", @rfValueEventHandler)
+      @board.on("button", @rfValueEventHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "switch", @rfValueEventHandler
+      @board.removeListener "button", @rfValueEventHandler
       super()
 
     getState: -> Promise.resolve @_state
