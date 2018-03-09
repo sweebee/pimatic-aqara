@@ -3,6 +3,7 @@
   "description": "Control the aqara (xiaomi) gateway",
   "author": "Wiebe Nieuwenhuis <info@wiebenieuwenhuis.nl> (http://wiebenieuwenhuis.nl)",
   "main": "aqara",
+  "icon": "icon.svg",
   "files": [
     "lumi-aqara",
     "aqara.coffee",
