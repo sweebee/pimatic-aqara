@@ -65,21 +65,20 @@ module.exports = (env) ->
                 device.state = 'click'
                 @emit "button", device
               )
-            when 'switch'
-              device.on('click', () =>
-                device.state = 'click'
-                @emit "switch", device
-              )
               device.on('doubleClick', () =>
                 device.state = 'doubleClick'
-                @emit "switch", device
+                @emit "button", device
               )
               device.on('longClickPress', () =>
                 device.state = 'longClickPress'
-                @emit "switch", device
+                @emit "button", device
               )
               device.on('longClickRelease', () =>
                 device.state = 'longClickRelease'
+                @emit "button", device
+              )
+            when 'switch'
+              device.on('click', () =>
                 @emit "switch", device
               )
         )
@@ -134,8 +133,8 @@ module.exports = (env) ->
         AqaraMotionSensor,
         AqaraDoorSensor,
         AqaraLeakSensor,
-        AqaraWirelessButton,
-        AqaraWirelessSwitch
+        AqaraWirelessSwitch,
+        AqaraWirelessButton
       ]
 
       for Cl in deviceClasses
@@ -390,7 +389,7 @@ module.exports = (env) ->
       }
 
       @attributes.state = {
-        description: "State of the remote"
+        description: "State of the button"
         type: "string"
       }
 
