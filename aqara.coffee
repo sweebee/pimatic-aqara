@@ -352,6 +352,7 @@ module.exports = (env) ->
 
     changeStateTo: (state) ->
       @_setState(state)
+      return Promise.resolve()
 
     destroy: ->
       @board.removeListener "switch", @rfValueEventHandler
