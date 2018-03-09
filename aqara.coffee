@@ -193,8 +193,9 @@ module.exports = (env) ->
           clearTimeout(@_resetPresenceTimeout)
           @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
-          @_lux = parseInt(result.getLux())
-          @emit "lux", @_lux
+          if result.getLux() != null
+            @_lux = parseInt(result.getLux())
+            @emit "lux", @_lux
 
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
