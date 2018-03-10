@@ -29,16 +29,13 @@ var Leak = function (_Subdevice) {
     value: function _handleState(state) {
       _get(Leak.prototype.__proto__ || Object.getPrototypeOf(Leak.prototype), '_handleState', this).call(this, state);
 
-      if (typeof state.status === 'undefined'){
-        this.emit('battery');
-      } else {
+      if (typeof state.status === 'undefined') return;
 
-          // possible state values are: leak, no_leak, iam
-          // iam is emitted when the sensor is squeezed and should not affect the state
-          if (state.status === 'leak') this._leaking = true; else if (state.status === 'no_leak') this._leaking = false;
+      // possible state values are: leak, no_leak, iam
+      // iam is emitted when the sensor is squeezed and should not affect the state
+      if (state.status === 'leak') this._leaking = true;else if (state.status === 'no_leak') this._leaking = false;
 
-          this.emit('update');
-      }
+      this.emit('update');
     }
   }, {
     key: 'isLeaking',
