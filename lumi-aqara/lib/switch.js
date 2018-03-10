@@ -28,24 +28,7 @@ var Switch = function (_Subdevice) {
 
       if (typeof state.status === 'undefined' && typeof state.channel_0 === 'undefined') return; // might be no_close
 
-      if(typeof state.status === 'undefined'){
-        state.status = state.channel_0;
-      }
-
-      switch (state.status) {
-        case 'click':
-          this.emit('click');
-          break;
-        case 'double_click':
-          this.emit('doubleClick');
-          break;
-        case 'long_click_press':
-          this.emit('longClickPress');
-          break;
-        case 'long_click_release':
-          this.emit('longClickRelease');
-          break;
-      }
+      this.emit('click');
     }
   }]);
 

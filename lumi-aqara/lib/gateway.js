@@ -152,6 +152,14 @@ var Gateway = function (_events$EventEmitter) {
           if (msg.sid === this._sid) {
             this._refreshKey(msg.token);
             this._rearmWatchdog();
+          } // self
+          else {
+              var _subdevice = this._subdevices.get(msg.sid);
+              if (_subdevice) {
+                  _subdevice._handleState(state);
+              } else {
+                  // console.log('did not manage to find device, or device not yet supported')
+              }
           }
           break;
         case 'report':

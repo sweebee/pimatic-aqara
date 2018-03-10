@@ -65,21 +65,20 @@ module.exports = (env) ->
                 device.state = 'click'
                 @emit "button", device
               )
-            when 'switch'
-              device.on('click', () =>
-                device.state = 'click'
-                @emit "switch", device
-              )
               device.on('doubleClick', () =>
                 device.state = 'doubleClick'
-                @emit "switch", device
+                @emit "button", device
               )
               device.on('longClickPress', () =>
                 device.state = 'longClickPress'
-                @emit "switch", device
+                @emit "button", device
               )
               device.on('longClickRelease', () =>
                 device.state = 'longClickRelease'
+                @emit "button", device
+              )
+            when 'switch'
+              device.on('click', () =>
                 @emit "switch", device
               )
         )
@@ -117,6 +116,8 @@ module.exports = (env) ->
                 deviceClass = 'AqaraMotionSensor'
               when 'magnet'
                 deviceClass = 'AqaraDoorSensor'
+              when 'sensor'
+                deviceClass = 'AqaraTemperatureSensor'
 
             if deviceClass
               @framework.deviceManager.discoveredDevice(
@@ -134,8 +135,9 @@ module.exports = (env) ->
         AqaraMotionSensor,
         AqaraDoorSensor,
         AqaraLeakSensor,
+        AqaraWirelessSwitch,
         AqaraWirelessButton,
-        AqaraWirelessSwitch
+        AqaraTemperatureSensor
       ]
 
       for Cl in deviceClasses
@@ -189,12 +191,14 @@ module.exports = (env) ->
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_setPresence(result._motion)
+          unless @_presence is result._motion
+            @_setPresence(result._motion)
           clearTimeout(@_resetPresenceTimeout)
           @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
-          @_lux = parseInt(result.getLux())
-          @emit "lux", @_lux
+          if result.getLux() != null
+            @_lux = parseInt(result.getLux())
+            @emit "lux", @_lux
 
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
@@ -243,7 +247,8 @@ module.exports = (env) ->
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_setContact(result.isOpen())
+          unless @_contact is result.isOpen()
+            @_setContact(result.isOpen())
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
@@ -295,8 +300,8 @@ module.exports = (env) ->
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_state = result.isLeaking()
-          @emit "state", @_state
+          unless @_state is result.isLeaking()
+            @emit "state", result.isLeaking()
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
@@ -389,7 +394,7 @@ module.exports = (env) ->
       }
 
       @attributes.state = {
-        description: "State of the remote"
+        description: "State of the button"
         type: "string"
       }
 
@@ -417,6 +422,81 @@ module.exports = (env) ->
       super()
 
     getState: -> Promise.resolve @_state
+    getBattery: -> Promise.resolve @_battery
+
+  class AqaraTemperatureSensor extends env.devices.Device
+
+    constructor: (@config, lastState, @board) ->
+      @id = @config.id
+      @name = @config.name
+      @_temperature = lastState?.temperature?.value
+      @_humidity = lastState?.humidity?.value
+      @_pressure = lastState?.pressure?.value
+      @_battery = lastState?.battery?.value
+      @attributes = {}
+
+      @attributes.battery = {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      }
+
+      @attributes.temperature = {
+        description: "the measured temperature"
+        type: "number"
+        unit: "°C"
+        acronym: 'T'
+      }
+
+      @attributes.humidity = {
+        description: "the measured humidity"
+        type: "number"
+        unit: '%'
+        acronym: 'H'
+      }
+
+      @attributes.pressure = {
+        description: "the measured pressure"
+        type: "number"
+        unit: 'kPa'
+        acronym: 'P'
+      }
+
+      @rfValueEventHandler = ( (result) =>
+        if result.getSid() is @config.SID
+          @_temperature = parseFloat(result.getTemperature())
+          @emit "temperature", @_temperature
+          @_humidity = parseFloat(result.getHumidity())
+          @emit "humidity", @_humidity
+          @_pressure = parseFloat(result.getPressure())
+          @emit "pressure", @_pressure
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
+      )
+
+      @board.on("sensor", @rfValueEventHandler)
+
+      super()
+
+    destroy: ->
+      @board.removeListener "sensor", @rfValueEventHandler
+      super()
+
+    getTemperature: -> Promise.resolve @_temperature
+    getHumidity: -> Promise.resolve @_humidity
+    getPressure: -> Promise.resolve @_pressure
     getBattery: -> Promise.resolve @_battery
 
   aqara = new aqara

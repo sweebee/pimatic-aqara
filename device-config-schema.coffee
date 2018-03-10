@@ -54,4 +54,12 @@ module.exports = {
         type: "integer"
         default: 100
   }
+  AqaraTemperatureSensor: {
+    title: "AqaraTemperatureSensor config options"
+    type: "object"
+    properties:
+      SID:
+        type: "string"
+        required: true
+  }
 }
