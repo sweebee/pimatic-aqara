@@ -29,7 +29,8 @@ var Leak = function (_Subdevice) {
     value: function _handleState(state) {
       _get(Leak.prototype.__proto__ || Object.getPrototypeOf(Leak.prototype), '_handleState', this).call(this, state);
 
-      if (typeof state.status === 'undefined') return;
+      // possibly heartbeat, set satus to no_leak
+      if (typeof state.status === 'undefined') state.status = 'no_leak';
 
       // possible state values are: leak, no_leak, iam
       // iam is emitted when the sensor is squeezed and should not affect the state
