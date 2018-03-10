@@ -116,6 +116,8 @@ module.exports = (env) ->
                 deviceClass = 'AqaraMotionSensor'
               when 'magnet'
                 deviceClass = 'AqaraDoorSensor'
+              when 'sensor'
+                deviceClass = 'AqaraTemperatureSensor'
 
             if deviceClass
               @framework.deviceManager.discoveredDevice(
@@ -134,7 +136,8 @@ module.exports = (env) ->
         AqaraDoorSensor,
         AqaraLeakSensor,
         AqaraWirelessSwitch,
-        AqaraWirelessButton
+        AqaraWirelessButton,
+        AqaraTemperatureSensor
       ]
 
       for Cl in deviceClasses
@@ -417,6 +420,81 @@ module.exports = (env) ->
       super()
 
     getState: -> Promise.resolve @_state
+    getBattery: -> Promise.resolve @_battery
+
+  class AqaraTemperatureSensor extends env.devices.Device
+
+    constructor: (@config, lastState, @board) ->
+      @id = @config.id
+      @name = @config.name
+      @_temperature = lastState?.temperature?.value
+      @_humidity = lastState?.humidity?.value
+      @_pressure = lastState?.pressure?.value
+      @_battery = lastState?.battery?.value
+      @attributes = {}
+
+      @attributes.battery = {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      }
+
+      @attributes.temperature = {
+        description: "the measured temperature"
+        type: "number"
+        unit: "°C"
+        acronym: 'T'
+      }
+
+      @attributes.humidity = {
+        description: "the measured humidity"
+        type: "number"
+        unit: '%'
+        acronym: 'H'
+      }
+
+      @attributes.pressure = {
+        description: "the measured pressure"
+        type: "number"
+        unit: 'kPa'
+        acronym: 'P'
+      }
+
+      @rfValueEventHandler = ( (result) =>
+        if result.getSid() is @config.SID
+          @_temperature = parseFloat(result.getTemperature())
+          @emit "temperature", @_temperature
+          @_humidity = parseFloat(result.getHumidity())
+          @emit "humidity", @_humidity
+          @_pressure = parseFloat(result.getPressure())
+          @emit "pressure", @_pressure
+          @_battery = result.getBatteryPercentage()
+          @emit "battery", @_battery
+      )
+
+      @board.on("sensor", @rfValueEventHandler)
+
+      super()
+
+    destroy: ->
+      @board.removeListener "sensor", @rfValueEventHandler
+      super()
+
+    getTemperature: -> Promise.resolve @_temperature
+    getHumidity: -> Promise.resolve @_humidity
+    getPressure: -> Promise.resolve @_pressure
     getBattery: -> Promise.resolve @_battery
 
   aqara = new aqara

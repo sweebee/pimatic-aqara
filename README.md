@@ -10,9 +10,14 @@ For controlling and receiving events from the Aqara (Xiaomi) Gateway.
 - Aqara Window Door Sensor
 - Aqara Smart Wireless Switch (click / longpress / doublepress)
 - Aqara Water/Leak Sensor (dry / wet)
+- Aqara Temperature/Humidity/Pressure sensor
 
-##### Soon supported
- - Aqara Temperature Humidity Sensor
+##### Not (yet) supported
+ - Aqara Smart Lock
+ - Aqara Curtain motor
+ - Aqara magic cube
+ 
+*( Feel free to donate one ;) )*
 
 #### Setup
 The Gateway must be in developer mode, when setting to developer mode you will also receive an password, save it because you need it to add the plugin.
@@ -22,7 +27,7 @@ Just install the plugin from the plugin page within pimatic, enable it and enter
 To add devices, just go to the devices page in pimatic and press "discover devices", the devices connected to the gateway should popup.
 
  
- #### Enabling developer mode
+#### Enabling developer mode
  
 - Select your Gateway in the MiHome app
 - Go to the “…” menu on the top right corner and click “About”
