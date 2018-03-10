@@ -191,7 +191,8 @@ module.exports = (env) ->
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_setPresence(result._motion)
+          unless @_presence is result._motion
+            @_setPresence(result._motion)
           clearTimeout(@_resetPresenceTimeout)
           @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
@@ -246,7 +247,8 @@ module.exports = (env) ->
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_setContact(result.isOpen())
+          unless @_contact is result.isOpen()
+            @_setContact(result.isOpen())
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
@@ -298,8 +300,8 @@ module.exports = (env) ->
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
-          @_state = result.isLeaking()
-          @emit "state", @_state
+          unless @_state is result.isLeaking()
+            @emit "state", result.isLeaking()
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )

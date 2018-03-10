@@ -33,7 +33,8 @@ var Leak = function (_Subdevice) {
 
       // possible state values are: leak, no_leak, iam
       // iam is emitted when the sensor is squeezed and should not affect the state
-      if (state.status === 'leak') this._leaking = true;else if (state.status === 'no_leak') this._leaking = false;
+      this._leaking = false;
+      if (state.status === 'leak') this._leaking = true;
 
       this.emit('update');
     }
