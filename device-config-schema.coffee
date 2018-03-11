@@ -11,6 +11,10 @@ module.exports = {
       resetTime:
         type: "integer"
         default: 30000
+      lux:
+        description: "If your using V1 of this sensor, disable lux"
+        type: "boolean"
+        default: true
   }
   AqaraDoorSensor: {
     title: "AqaraDoorSensor config options"
@@ -28,10 +32,10 @@ module.exports = {
       SID:
         type: "string"
         required: true
-      Wet:
+      wet:
         type: "string"
         default: "wet"
-      Dry:
+      dry:
         type: "string"
         default: "dry"
   }
@@ -61,5 +65,9 @@ module.exports = {
       SID:
         type: "string"
         required: true
+      pressure:
+        description: "If your using V1 of this sensor, disable pressure"
+        type: "boolean"
+        default: true
   }
 }
