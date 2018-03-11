@@ -156,7 +156,8 @@ module.exports = (env) ->
       @name = @config.name
       @_presence = lastState?.presence?.value or false
       @_battery = lastState?.battery?.value
-      @_lux = lastState?.lux?.value
+      if @config.lux
+        @_lux = lastState?.lux?.value
 
       @addAttribute('battery', {
         description: "Battery",
@@ -177,13 +178,14 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
-      @addAttribute('lux', {
-        description: "Lux",
-        type: "number"
-        displaySparkline: false
-        unit: "lux"
-      })
-      @['lux'] = ()-> Promise.resolve(@_lux)
+      if @config.lux
+        @addAttribute('lux', {
+          description: "Lux",
+          type: "number"
+          displaySparkline: false
+          unit: "lux"
+        })
+        @['lux'] = ()-> Promise.resolve(@_lux)
 
       resetPresence = ( =>
         @_setPresence(no)
@@ -196,7 +198,7 @@ module.exports = (env) ->
           clearTimeout(@_resetPresenceTimeout)
           @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
-          if result.getLux() != null
+          if @config.lux and result.getLux() != null
             @_lux = parseInt(result.getLux())
             @emit "lux", @_lux
 
@@ -431,7 +433,8 @@ module.exports = (env) ->
       @name = @config.name
       @_temperature = lastState?.temperature?.value
       @_humidity = lastState?.humidity?.value
-      @_pressure = lastState?.pressure?.value
+      if @config.pressure
+        @_pressure = lastState?.pressure?.value
       @_battery = lastState?.battery?.value
       @attributes = {}
 
@@ -467,12 +470,13 @@ module.exports = (env) ->
         acronym: 'H'
       }
 
-      @attributes.pressure = {
-        description: "the measured pressure"
-        type: "number"
-        unit: 'kPa'
-        acronym: 'P'
-      }
+      if @config.pressure
+        @attributes.pressure = {
+          description: "the measured pressure"
+          type: "number"
+          unit: 'kPa'
+          acronym: 'P'
+        }
 
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
@@ -480,8 +484,9 @@ module.exports = (env) ->
           @emit "temperature", @_temperature
           @_humidity = parseFloat(result.getHumidity())
           @emit "humidity", @_humidity
-          @_pressure = parseFloat(result.getPressure())
-          @emit "pressure", @_pressure
+          if @config.pressure
+            @_pressure = parseFloat(result.getPressure())
+            @emit "pressure", @_pressure
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
