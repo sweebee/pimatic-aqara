@@ -9,9 +9,10 @@
     "aqara.coffee",
     "README.md",
     "aqara-config-schema.coffee",
-    "device-config-schema.coffee"
+    "device-config-schema.coffee",
+    "icon.svg"
   ],
-  "version": "0.2.8",
+  "version": "0.2.9",
   "homepage": "http://wiebenieuwenhuis.nl",
   "repository": {
     "type": "git",
