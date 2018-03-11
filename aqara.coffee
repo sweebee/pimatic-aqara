@@ -297,7 +297,7 @@ module.exports = (env) ->
       @attributes.state = {
         description: "State of the remote"
         type: "boolean"
-        labels: [@config.Wet, @config.Dry]
+        labels: [@config.wet, @config.dry]
       }
 
       @rfValueEventHandler = ( (result) =>
