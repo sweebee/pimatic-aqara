@@ -12,7 +12,7 @@
     "device-config-schema.coffee",
     "icon.svg"
   ],
-  "version": "0.2.9",
+  "version": "0.2.10",
   "homepage": "http://wiebenieuwenhuis.nl",
   "repository": {
     "type": "git",
