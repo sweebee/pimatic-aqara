@@ -148,8 +148,7 @@ module.exports = (env) ->
           })
 
     showDiscovered: (devices) ->
-      for key, value of devices
-        SID = key
+      for SID, value of devices
 
         newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
           device.SID is SID
