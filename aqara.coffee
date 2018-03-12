@@ -32,7 +32,6 @@ module.exports = (env) ->
         )
 
         gateway.on('subdevice', (device) =>
-          env.logger.debug(device)
           if not @devices[device._sid]?
             @emit "discovered", device
           @devices[device._sid] = device
@@ -96,33 +95,31 @@ module.exports = (env) ->
       @board = new Board(@framework, @config)
 
       @framework.deviceManager.on('discover', (eventData) =>
+        if not @board.gateway
+          return
 
         @framework.deviceManager.discoverMessage(
           'pimatic-aqara', "Searching for devices"
         )
 
-        if @board.gateway
-          @board.devices = {}
-          @board.gateway.discover(true)
-          @board.gateway.getDevices()
-
-        interval = setInterval(( =>
-          env.logger.debug('Getting devices')
-          @board.gateway.getDevices()
-        ), 5000)
-
+        this.clearDiscovery()
         @discoverHandler = ( (device) =>
-          devices = {}
-          devices[device._sid] = device
-          this.showDiscovered(devices)
+          this.showDiscovered(device)
         )
 
         @board.on("discovered", @discoverHandler)
 
+        @board.devices = {}
+        @board.gateway.getDevices()
+
+        if @config.pairing
+          @board.gateway.discover(true)
+          @interval = setInterval(( =>
+            @board.gateway.getDevices()
+          ), 5000)
+
         setTimeout(( =>
-          @board.gateway.discover(false)
-          @board.removeListener "discovered", @discoverHandler
-          clearInterval(interval)
+          this.clearDiscovery()
         ), eventData.time)
       )
 
@@ -147,35 +144,40 @@ module.exports = (env) ->
               return device
           })
 
-    showDiscovered: (devices) ->
-      for SID, value of devices
+    showDiscovered: (value) ->
 
-        newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
-          device.SID is SID
+      newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
+        device.SID is value._sid
 
-        if newdevice
-          deviceClass = false
-          switch value._type
-            when 'switch'
-              deviceClass = 'AqaraWirelessSwitch'
-            when 'button'
-              deviceClass = 'AqaraWirelessButton'
-            when 'leak'
-              deviceClass = 'AqaraLeakSensor'
-            when 'motion'
-              deviceClass = 'AqaraMotionSensor'
-            when 'magnet'
-              deviceClass = 'AqaraDoorSensor'
-            when 'sensor'
-              deviceClass = 'AqaraTemperatureSensor'
+      if newdevice
+        deviceClass = false
+        switch value._type
+          when 'switch'
+            deviceClass = 'AqaraWirelessSwitch'
+          when 'button'
+            deviceClass = 'AqaraWirelessButton'
+          when 'leak'
+            deviceClass = 'AqaraLeakSensor'
+          when 'motion'
+            deviceClass = 'AqaraMotionSensor'
+          when 'magnet'
+            deviceClass = 'AqaraDoorSensor'
+          when 'sensor'
+            deviceClass = 'AqaraTemperatureSensor'
 
-          if deviceClass
-            @framework.deviceManager.discoveredDevice(
-              'pimatic-aqara', "#{deviceClass}", {
-                SID: SID,
-                class: deviceClass
-              }
-            )
+        if deviceClass
+          @framework.deviceManager.discoveredDevice(
+            'pimatic-aqara', "#{deviceClass}", {
+              SID: value._sid,
+              class: deviceClass
+            }
+          )
+
+    clearDiscovery: ->
+      @board.removeListener "discovered", @discoverHandler if @discoverHandler
+      if @config.pairing
+        @board.gateway.discover(false)
+        clearInterval @interval if @interval
 
 
   class AqaraMotionSensor extends env.devices.PresenceSensor

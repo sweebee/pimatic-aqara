@@ -240,6 +240,9 @@ var Gateway = function (_events$EventEmitter) {
   }, {
     key: 'setPassword',
     value: function setPassword(password) {
+      if(this._password){
+        return;
+      }
       this._password = password;
       this._refreshKey();
     }
