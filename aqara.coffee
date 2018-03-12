@@ -10,14 +10,15 @@ module.exports = (env) ->
     constructor: (framework, config) ->
       @config = config
       @framework = framework
-
+      @gateway = null
       @devices = {}
 
       @driver = new LumiAqara()
 
       env.logger.debug("Searching for gateway...")
       @driver.on('gateway', (gateway) =>
-        env.logger.debug("Gateway discovered")
+        @gateway = gateway
+        env.logger.info("Gateway discovered")
 
         # Gateway ready
         gateway.on('ready', () =>
@@ -27,11 +28,13 @@ module.exports = (env) ->
 
         # Gateway offline
         gateway.on('offline', () =>
-          env.logger.error('Gateway is offline')
+          env.logger.warn('Gateway not reachable')
         )
 
         gateway.on('subdevice', (device) =>
           env.logger.debug(device)
+          if not @devices[device._sid]?
+            @emit "discovered", device
           @devices[device._sid] = device
           switch device.getType()
             when 'magnet'
@@ -97,35 +100,30 @@ module.exports = (env) ->
         @framework.deviceManager.discoverMessage(
           'pimatic-aqara', "Searching for devices"
         )
-        for key, value of @board.devices
-          SID = key
 
-          newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
-            device.SID is SID
+        if @board.gateway
+          @board.devices = {}
+          @board.gateway.discover(true)
+          @board.gateway.getDevices()
 
-          if newdevice
-            deviceClass = false
-            switch value._type
-              when 'switch'
-                deviceClass = 'AqaraWirelessSwitch'
-              when 'button'
-                deviceClass = 'AqaraWirelessButton'
-              when 'leak'
-                deviceClass = 'AqaraLeakSensor'
-              when 'motion'
-                deviceClass = 'AqaraMotionSensor'
-              when 'magnet'
-                deviceClass = 'AqaraDoorSensor'
-              when 'sensor'
-                deviceClass = 'AqaraTemperatureSensor'
+        interval = setInterval(( =>
+          env.logger.debug('Getting devices')
+          @board.gateway.getDevices()
+        ), 5000)
 
-            if deviceClass
-              @framework.deviceManager.discoveredDevice(
-                'pimatic-aqara', "#{deviceClass}", {
-                  SID: SID,
-                  class: deviceClass
-                }
-              )
+        @discoverHandler = ( (device) =>
+          devices = {}
+          devices[device._sid] = device
+          this.showDiscovered(devices)
+        )
+
+        @board.on("discovered", @discoverHandler)
+
+        setTimeout(( =>
+          @board.gateway.discover(false)
+          @board.removeListener "discovered", @discoverHandler
+          clearInterval(interval)
+        ), eventData.time)
       )
 
       #Register devices
@@ -148,6 +146,38 @@ module.exports = (env) ->
               device  =  new Cl(config, lastState, @board)
               return device
           })
+
+    showDiscovered: (devices) ->
+      for key, value of devices
+        SID = key
+
+        newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
+          device.SID is SID
+
+        if newdevice
+          deviceClass = false
+          switch value._type
+            when 'switch'
+              deviceClass = 'AqaraWirelessSwitch'
+            when 'button'
+              deviceClass = 'AqaraWirelessButton'
+            when 'leak'
+              deviceClass = 'AqaraLeakSensor'
+            when 'motion'
+              deviceClass = 'AqaraMotionSensor'
+            when 'magnet'
+              deviceClass = 'AqaraDoorSensor'
+            when 'sensor'
+              deviceClass = 'AqaraTemperatureSensor'
+
+          if deviceClass
+            @framework.deviceManager.discoveredDevice(
+              'pimatic-aqara', "#{deviceClass}", {
+                SID: SID,
+                class: deviceClass
+              }
+            )
+
 
   class AqaraMotionSensor extends env.devices.PresenceSensor
 

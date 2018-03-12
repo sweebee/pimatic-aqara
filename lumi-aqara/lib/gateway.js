@@ -217,6 +217,28 @@ var Gateway = function (_events$EventEmitter) {
       this._sendUnicast(payload);
     }
   }, {
+      key: 'discover',
+      value: function discover(on) {
+          if (!this._ready) return;
+          var state;
+          if(on){
+            state = "yes";
+          } else {
+            state = "no";
+          }
+
+          var payload = '{"cmd":"write","model":"gateway","sid":"'+ this._sid +'","short_id":0,"data":"{\"join_permission\":"' + state + '\", \"key\": \"' + this._key + '\"}" }';
+          console.log(payload);
+          this._sendUnicast(payload);
+      }
+  }, {
+      key: 'getDevices',
+      value: function discover() {
+          if (!this._ready) return;
+          var payload = '{"cmd": "get_id_list"}';
+          this._sendUnicast(payload);
+      }
+  }, {
     key: 'setPassword',
     value: function setPassword(password) {
       this._password = password;
