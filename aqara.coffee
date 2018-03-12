@@ -333,7 +333,8 @@ module.exports = (env) ->
       @rfValueEventHandler = ( (result) =>
         if result.getSid() is @config.SID
           unless @_state is result.isLeaking()
-            @emit "state", result.isLeaking()
+            @_state = result.isLeaking()
+            @emit "state", @_state
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )

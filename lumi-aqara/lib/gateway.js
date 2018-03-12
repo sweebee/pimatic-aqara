@@ -228,7 +228,6 @@ var Gateway = function (_events$EventEmitter) {
           }
 
           var payload = '{"cmd":"write","model":"gateway","sid":"'+ this._sid +'","short_id":0,"data":"{\"join_permission\":"' + state + '\", \"key\": \"' + this._key + '\"}" }';
-          console.log(payload);
           this._sendUnicast(payload);
       }
   }, {
