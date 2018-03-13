@@ -32,57 +32,13 @@ module.exports = (env) ->
         )
 
         gateway.on('subdevice', (device) =>
-          if not @devices[device._sid]?
-            @emit "discovered", device
-          @devices[device._sid] = device
-          switch device.getType()
-            when 'magnet'
-              device.on('open', () =>
-                @emit "magnet", device
-              )
-              device.on('close', () =>
-                @emit "magnet", device
-              )
-            when 'motion'
-              device.on('motion', () =>
-                @emit "motion", device
-              )
-              device.on('noMotion', () =>
-                @emit "motion", device
-              )
-            when 'leak'
-              device.on('update', () =>
-                @emit "leak", device
-              )
-            when 'sensor'
-              device.on('update', () =>
-                @emit "sensor", device
-              )
-            when 'cube'
-              device.on('update', () =>
-                @emit "cube", device
-              )
-            when 'button'
-              device.on('click', () =>
-                device.state = 'click'
-                @emit "button", device
-              )
-              device.on('doubleClick', () =>
-                device.state = 'doubleClick'
-                @emit "button", device
-              )
-              device.on('longClickPress', () =>
-                device.state = 'longClickPress'
-                @emit "button", device
-              )
-              device.on('longClickRelease', () =>
-                device.state = 'longClickRelease'
-                @emit "button", device
-              )
-            when 'switch'
-              device.on('click', () =>
-                @emit "switch", device
-              )
+          if not @devices[device.getSid()]?
+              @emit "discovered", device
+          @devices[device.getSid()] = device
+          device.on('report', () =>
+            env.logger.debug(device)
+            @emit "report", device
+          )
         )
       )
 
@@ -147,11 +103,11 @@ module.exports = (env) ->
     showDiscovered: (device) ->
 
       newdevice = not @framework.deviceManager.devicesConfig.some (result, iterator) =>
-        result.SID is device._sid
+        result.SID is device.getSid()
 
       if newdevice
         config_options = {}
-        switch device._type
+        switch device.getType()
           when 'switch'
             config_options.class = 'AqaraWirelessSwitch'
           when 'button'
@@ -160,17 +116,17 @@ module.exports = (env) ->
             config_options.class = 'AqaraLeakSensor'
           when 'motion'
             config_options.class = 'AqaraMotionSensor'
-            if not device._lux
+            if not device.getLux()
               config_options.lux = false
           when 'magnet'
             config_options.class = 'AqaraDoorSensor'
           when 'sensor'
             config_options.class = 'AqaraTemperatureSensor'
-            if not device._pressure
+            if not device.getPressure()
               config_options.pressure = false
 
         if config_options.class
-          config_options.SID = device._sid
+          config_options.SID = device.getSid()
           @framework.deviceManager.discoveredDevice(
             'pimatic-aqara', "#{config_options.class}", config_options
           )
@@ -225,11 +181,12 @@ module.exports = (env) ->
       )
 
       @rfValueEventHandler = ( (result) =>
-        if result.getSid() is @config.SID
-          unless @_presence is result._motion
-            @_setPresence(result._motion)
-          clearTimeout(@_resetPresenceTimeout)
-          @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
+        if result.getSid() is @config.SID and result.getType() is "motion"
+          if(result.stateUpdated())
+            unless @_presence is result.isPresent()
+              @_setPresence(result.isPresent())
+            clearTimeout(@_resetPresenceTimeout)
+            @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
           if @config.lux and result.getLux() != null
             @_lux = parseInt(result.getLux())
@@ -239,13 +196,13 @@ module.exports = (env) ->
           @emit "battery", @_battery
       )
 
-      @board.on("motion", @rfValueEventHandler)
+      @board.on("report", @rfValueEventHandler)
 
       super()
 
     destroy: ->
       clearTimeout(@_resetPresenceTimeout)
-      @board.removeListener "motion", @rfValueEventHandler
+      @board.removeListener "report", @rfValueEventHandler
       super()
 
     getPresence: -> Promise.resolve @_presence
@@ -281,19 +238,19 @@ module.exports = (env) ->
       @['battery'] = ()-> Promise.resolve(@_battery)
 
       @rfValueEventHandler = ( (result) =>
-        if result.getSid() is @config.SID
+        if result.getSid() is @config.SID and result.getType() is "magnet"
           unless @_contact is result.isOpen()
             @_setContact(result.isOpen())
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
 
-      @board.on("magnet", @rfValueEventHandler)
+      @board.on("report", @rfValueEventHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "magnet", @rfValueEventHandler
+      @board.removeListener "report", @rfValueEventHandler
       super()
 
     getContact: -> Promise.resolve @_contact
@@ -334,7 +291,7 @@ module.exports = (env) ->
       }
 
       @rfValueEventHandler = ( (result) =>
-        if result.getSid() is @config.SID
+        if result.getSid() is @config.SID and result.getType() is "leak"
           unless @_state is result.isLeaking()
             @_state = result.isLeaking()
             @emit "state", @_state
@@ -342,12 +299,12 @@ module.exports = (env) ->
           @emit "battery", @_battery
       )
 
-      @board.on("leak", @rfValueEventHandler)
+      @board.on("report", @rfValueEventHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "leak", @rfValueEventHandler
+      @board.removeListener "report", @rfValueEventHandler
       super()
 
     getState: -> Promise.resolve @_state
@@ -381,13 +338,14 @@ module.exports = (env) ->
       @['battery'] = ()-> Promise.resolve(@_battery)
 
       @rfValueEventHandler = ( (result) =>
-        if result.getSid() is @config.SID
-          @_setState(!@_state)
+        if result.getSid() is @config.SID and result.getType() is "switch"
+          if result.stateUpdated()
+            @_setState(!@_state)
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
 
-      @board.on("switch", @rfValueEventHandler)
+      @board.on("report", @rfValueEventHandler)
 
       super()
 
@@ -396,7 +354,7 @@ module.exports = (env) ->
       return Promise.resolve()
 
     destroy: ->
-      @board.removeListener "switch", @rfValueEventHandler
+      @board.removeListener "report", @rfValueEventHandler
       super()
 
     getSate: -> Promise.resolve @_state
@@ -440,21 +398,22 @@ module.exports = (env) ->
       )
 
       @rfValueEventHandler = ( (result) =>
-        if result.getSid() is @config.SID
-          @_state = result.state
-          @emit "state", @_state
+        if result.getSid() is @config.SID and result.getType() is "button"
+          if result.stateUpdated()
+            @_state = result.state
+            @emit "state", @_state
+            clearTimeout(@_resetStateTimeout)
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
-          clearTimeout(@_resetStateTimeout)
           @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
       )
 
-      @board.on("button", @rfValueEventHandler)
+      @board.on("report", @rfValueEventHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "button", @rfValueEventHandler
+      @board.removeListener "report", @rfValueEventHandler
       super()
 
     getState: -> Promise.resolve @_state

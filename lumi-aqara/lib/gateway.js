@@ -16,13 +16,7 @@ var _require = require('../constants'),
     GATEWAY_HEARTBEAT_INTERVAL_MS = _require.GATEWAY_HEARTBEAT_INTERVAL_MS,
     GATEWAY_HEARTBEAT_OFFLINE_RATIO = _require.GATEWAY_HEARTBEAT_OFFLINE_RATIO;
 
-var Magnet = require('./magnet');
-var Switch = require('./switch');
-var Button = require('./button');
-var Motion = require('./motion');
-var Sensor = require('./sensor');
-var Leak = require('./leak');
-var Cube = require('./cube');
+var Subdevice = require('./subdevice');
 
 var Gateway = function (_events$EventEmitter) {
   _inherits(Gateway, _events$EventEmitter);
@@ -114,28 +108,28 @@ var Gateway = function (_events$EventEmitter) {
             switch (type) {
               case 'magnet':
               case 'sensor_magnet.aq2':
-                subdevice = new Magnet({ sid });
+                subdevice = new Subdevice({ sid, type: 'magnet' });
                 break;
               case '86sw1':
-                subdevice = new Switch({ sid });
+                subdevice = new Subdevice({ sid, type: 'switch' });
                 break;
               case 'switch':
               case 'sensor_switch.aq2':
-                subdevice = new Button({ sid });
+                subdevice = new Subdevice({ sid, type: 'button' });
                 break;
               case 'motion':
               case 'sensor_motion.aq2':
-                subdevice = new Motion({ sid });
+                subdevice = new Subdevice({ sid, type: 'motion' });
                 break;
               case 'sensor_ht':
               case 'weather.v1':
-                subdevice = new Sensor({ sid });
+                subdevice = new Subdevice({ sid, type: 'temperature' });
                 break;
               case 'sensor_wleak.aq1':
-                subdevice = new Leak({ sid });
+                subdevice = new Subdevice({ sid, type: 'leak' });
                 break;
               case 'cube':
-                subdevice = new Cube({ sid });
+                subdevice = new Subdevice({ sid, type: 'cube' });
                 break;
               default:
                 return false;
@@ -235,6 +229,13 @@ var Gateway = function (_events$EventEmitter) {
       value: function discover() {
           if (!this._ready) return;
           var payload = '{"cmd": "get_id_list"}';
+          this._sendUnicast(payload);
+      }
+  },{
+      key: 'read',
+      value: function read(sid) {
+          if (!this._ready) return;
+          var payload = '{"cmd":"read","sid":"' + sid + '"}';
           this._sendUnicast(payload);
       }
   }, {
