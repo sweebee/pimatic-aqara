@@ -147,6 +147,11 @@ var Subdevice = function (_events$EventEmitter) {
             return this._state;
         }
     }, {
+        key: 'getLux',
+        value: function getLux() {
+            return this._lux;
+        }
+    }, {
         key: 'getBatteryPercentage',
         value: function getBatteryPercentage() {
             var perc = 100 - Math.round((SUBDEVICE_MAX_VOLT - this._voltage) / (SUBDEVICE_MAX_VOLT - SUBDEVICE_MIN_VOLT) * 100);

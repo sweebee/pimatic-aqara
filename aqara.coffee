@@ -1,7 +1,6 @@
 module.exports = (env) ->
 
   Promise = env.require 'bluebird'
-  assert = env.require 'cassert'
   events = env.require 'events'
   LumiAqara = require './lumi-aqara'
 
@@ -63,17 +62,20 @@ module.exports = (env) ->
           this.showDiscovered(device)
         )
 
+        # Listen to discovered devices
         @board.on("discovered", @discoverHandler)
 
         @board.devices = {}
         @board.gateway.getDevices()
 
+        # If pairing is enabled, send it to the gateway
         if @config.pairing
           @board.gateway.discover(true)
           @interval = setInterval(( =>
             @board.gateway.getDevices()
           ), 5000)
 
+        # Disable discovering after 20s
         setTimeout(( =>
           this.clearDiscovery()
         ), eventData.time)
@@ -167,6 +169,7 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
+      # If lux is enabled, add it
       if @config.lux
         @addAttribute('lux', {
           description: "Lux",
@@ -180,29 +183,37 @@ module.exports = (env) ->
         @_setPresence(no)
       )
 
-      @rfValueEventHandler = ( (result) =>
+      # Report handler
+      @reportHandler = ( (result) =>
+
         if result.getSid() is @config.SID and result.getType() is "motion"
+
+          # Update presence
           if(result.stateUpdated())
             unless @_presence is result.isPresent()
               @_setPresence(result.isPresent())
             clearTimeout(@_resetPresenceTimeout)
             @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
+          # Update lux value
           if @config.lux and result.getLux() != null
             @_lux = parseInt(result.getLux())
             @emit "lux", @_lux
 
+          # Update battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
+
       )
 
-      @board.on("report", @rfValueEventHandler)
+      # Listen for device reports
+      @board.on("report", @reportHandler)
 
       super()
 
     destroy: ->
       clearTimeout(@_resetPresenceTimeout)
-      @board.removeListener "report", @rfValueEventHandler
+      @board.removeListener "report", @reportHandler
       super()
 
     getPresence: -> Promise.resolve @_presence
@@ -237,20 +248,29 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
-      @rfValueEventHandler = ( (result) =>
+      # Report handler
+      @reportHandler = ( (result) =>
+
         if result.getSid() is @config.SID and result.getType() is "magnet"
-          unless @_contact is result.isOpen()
-            @_setContact(result.isOpen())
+
+          # Update the door/window state
+          if result.stateUpdated()
+            unless @_contact is result.isOpen()
+              @_setContact(result.isOpen())
+
+          # Update the battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
+
       )
 
-      @board.on("report", @rfValueEventHandler)
+      # Listen for device reports
+      @board.on("report", @reportHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "report", @rfValueEventHandler
+      @board.removeListener "report", @reportHandler
       super()
 
     getContact: -> Promise.resolve @_contact
@@ -285,26 +305,34 @@ module.exports = (env) ->
       }
 
       @attributes.state = {
-        description: "State of the remote"
+        description: "State of the leak sensor"
         type: "boolean"
         labels: [@config.wet, @config.dry]
       }
 
-      @rfValueEventHandler = ( (result) =>
+      # Report handler
+      @reportHandler = ( (result) =>
+
         if result.getSid() is @config.SID and result.getType() is "leak"
-          unless @_state is result.isLeaking()
-            @_state = result.isLeaking()
-            @emit "state", @_state
+
+          # Check the leak status
+          if result.stateUpdated()
+            unless @_state is result.isLeaking()
+              @_state = result.isLeaking()
+              @emit "state", @_state
+
+          # Update the battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
 
-      @board.on("report", @rfValueEventHandler)
+      # Listen for device reports
+      @board.on("report", @reportHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "report", @rfValueEventHandler
+      @board.removeListener "report", @reportHandler
       super()
 
     getState: -> Promise.resolve @_state
@@ -337,15 +365,23 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
-      @rfValueEventHandler = ( (result) =>
+      # Report handler
+      @reportHandler = ( (result) =>
+
         if result.getSid() is @config.SID and result.getType() is "switch"
+
+          # Check if clicked
           if result.stateUpdated()
             @_setState(!@_state)
+
+          # Update the battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
+
       )
 
-      @board.on("report", @rfValueEventHandler)
+      # Listen for device reports
+      @board.on("report", @reportHandler)
 
       super()
 
@@ -354,7 +390,7 @@ module.exports = (env) ->
       return Promise.resolve()
 
     destroy: ->
-      @board.removeListener "report", @rfValueEventHandler
+      @board.removeListener "report", @reportHandler
       super()
 
     getSate: -> Promise.resolve @_state
@@ -392,28 +428,36 @@ module.exports = (env) ->
         type: "string"
       }
 
+      # Reset the state
       resetState = ( =>
         @_state = 'waiting...'
         @emit "state", @_state
       )
 
-      @rfValueEventHandler = ( (result) =>
+      # Report handler
+      @reportHandler = ( (result) =>
+
         if result.getSid() is @config.SID and result.getType() is "button"
+
+          # Check if the button is pressed
           if result.stateUpdated()
             @_state = result.state
             @emit "state", @_state
             clearTimeout(@_resetStateTimeout)
+            @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
+
+          # Update the battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
-          @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
       )
 
-      @board.on("report", @rfValueEventHandler)
+      # Listen for device reports
+      @board.on("report", @reportHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "report", @rfValueEventHandler
+      @board.removeListener "report", @reportHandler
       super()
 
     getState: -> Promise.resolve @_state
@@ -471,25 +515,36 @@ module.exports = (env) ->
           acronym: 'P'
         }
 
-      @rfValueEventHandler = ( (result) =>
-        if result.getSid() is @config.SID
+      # Report handler
+      @reportHandler = ( (result) =>
+
+        if result.getSid() is @config.SID and result.getType() == 'temperature'
+
+          # Update the temperature value
           @_temperature = parseFloat(result.getTemperature())
           @emit "temperature", @_temperature
+
+          # Update the humidity value
           @_humidity = parseFloat(result.getHumidity())
           @emit "humidity", @_humidity
+
+          # Update the pressure value
           if @config.pressure
             @_pressure = parseFloat(result.getPressure())
             @emit "pressure", @_pressure
+
+          # Update the battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
       )
 
-      @board.on("sensor", @rfValueEventHandler)
+      # Listen for device reports
+      @board.on("sensor", @reportHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "sensor", @rfValueEventHandler
+      @board.removeListener "sensor", @reportHandler
       super()
 
     getTemperature: -> Promise.resolve @_temperature
