@@ -52,7 +52,8 @@ var Subdevice = function (_events$EventEmitter) {
   }, {
     key: 'getBatteryPercentage',
     value: function getBatteryPercentage() {
-      return Math.round((SUBDEVICE_MAX_VOLT - this._voltage) / (SUBDEVICE_MAX_VOLT - SUBDEVICE_MIN_VOLT) * 100);
+      var perc = 100 - Math.round((SUBDEVICE_MAX_VOLT - this._voltage) / (SUBDEVICE_MAX_VOLT - SUBDEVICE_MIN_VOLT) * 100);
+      return Math.min(Math.max(perc, 0), 100);
     }
   }]);
 
