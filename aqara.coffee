@@ -220,7 +220,7 @@ module.exports = (env) ->
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -298,7 +298,7 @@ module.exports = (env) ->
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -381,7 +381,7 @@ module.exports = (env) ->
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
       )
 
       # Listen for device reports
@@ -454,7 +454,7 @@ module.exports = (env) ->
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -546,7 +546,7 @@ module.exports = (env) ->
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -654,7 +654,7 @@ module.exports = (env) ->
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
