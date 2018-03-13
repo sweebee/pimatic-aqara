@@ -30,6 +30,11 @@ module.exports = (env) ->
           env.logger.warn('Gateway not reachable')
         )
 
+        #heartbeat test
+        gateway.on('heartbeat'), (msg) =>
+         env.logger.debug('Heartbeat received')
+         env.logger.debug(msg)
+
         gateway.on('subdevice', (device) =>
           if not @devices[device.getSid()]?
               @emit "discovered", device
