@@ -153,7 +153,7 @@ module.exports = (env) ->
       @_battery = lastState?.battery?.value
       if @config.lux
         @_lux = lastState?.lux?.value
-      @_reachable = lastState?.reachable?.value
+      @_reachable = lastState?.reachable?.value or true
 
       @addAttribute('battery', {
         description: "Battery",
@@ -194,12 +194,7 @@ module.exports = (env) ->
         hidden: true
       }
 
-      checkReachable = ( =>
-        @board.gateway.read(config.SID)
-        @_reachableTimer = setTimeout(notReachable, 10000)
-      )
-
-      notReachable = ( =>
+      resetReachable = ( =>
         @_reachable = false
         @emit "reachable", @_reachable
       )
@@ -225,12 +220,12 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Check the reachability
-          if ! @_reachable
+          # Update the reachability
+          unless @_reachable
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(checkReachable, 3600000)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -257,7 +252,7 @@ module.exports = (env) ->
       @name = @config.name
       @_contact = lastState?.contact?.value or false
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value
+      @_reachable = lastState?.reachable?.value or true
 
       @addAttribute('battery', {
         description: "Battery",
@@ -284,12 +279,7 @@ module.exports = (env) ->
         hidden: true
       }
 
-      checkReachable = ( =>
-        @board.gateway.read(config.SID)
-        @_reachableTimer = setTimeout(notReachable, 10000)
-      )
-
-      notReachable = ( =>
+      resetReachable = ( =>
         @_reachable = false
         @emit "reachable", @_reachable
       )
@@ -308,12 +298,12 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Check the reachability
-          if ! @_reachable
+          # Update the reachability
+          unless @_reachable
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(checkReachable, 3600000)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -337,7 +327,7 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value or false
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value
+      @_reachable = lastState?.reachable?.value or true
 
       @attributes = {}
 
@@ -371,12 +361,7 @@ module.exports = (env) ->
         hidden: true
       }
 
-      checkReachable = ( =>
-        @board.gateway.read(config.SID)
-        @_reachableTimer = setTimeout(notReachable, 10000)
-      )
-
-      notReachable = ( =>
+      resetReachable = ( =>
         @_reachable = false
         @emit "reachable", @_reachable
       )
@@ -396,12 +381,12 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Check the reachability
-          if ! @_reachable
+          # Update the reachability
+          unless @_reachable
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(checkReachable, 3600000)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
       )
 
       # Listen for device reports
@@ -424,7 +409,7 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value or false
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value
+      @_reachable = lastState?.reachable?.value or true
 
       @addAttribute('battery', {
         description: "Battery",
@@ -451,12 +436,7 @@ module.exports = (env) ->
         hidden: true
       }
 
-      checkReachable = ( =>
-        @board.gateway.read(config.SID)
-        @_reachableTimer = setTimeout(notReachable, 10000)
-      )
-
-      notReachable = ( =>
+      resetReachable = ( =>
         @_reachable = false
         @emit "reachable", @_reachable
       )
@@ -474,12 +454,12 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Check the reachability
-          if ! @_reachable
+          # Update the reachability
+          unless @_reachable
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(checkReachable, 3600000)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -507,7 +487,7 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value
+      @_reachable = lastState?.reachable?.value or true
       @attributes = {}
 
       @attributes.battery = {
@@ -545,12 +525,7 @@ module.exports = (env) ->
         hidden: true
       }
 
-      checkReachable = ( =>
-        @board.gateway.read(config.SID)
-        @_reachableTimer = setTimeout(notReachable, 10000)
-      )
-
-      notReachable = ( =>
+      resetReachable = ( =>
         @_reachable = false
         @emit "reachable", @_reachable
       )
@@ -571,12 +546,12 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Check the reachability
-          if ! @_reachable
+          # Update the reachability
+          unless @_reachable
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(checkReachable, 3600000)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -603,7 +578,7 @@ module.exports = (env) ->
       if @config.pressure
         @_pressure = lastState?.pressure?.value
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value
+      @_reachable = lastState?.reachable?.value or true
       @attributes = {}
 
       @attributes.battery = {
@@ -652,12 +627,7 @@ module.exports = (env) ->
         hidden: true
       }
 
-      checkReachable = ( =>
-        @board.gateway.read(config.SID)
-        @_reachableTimer = setTimeout(notReachable, 10000)
-      )
-
-      notReachable = ( =>
+      resetReachable = ( =>
         @_reachable = false
         @emit "reachable", @_reachable
       )
@@ -684,12 +654,12 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Check the reachability
-          if ! @_reachable
+          # Update the reachability
+          unless @_reachable
             @_reachable = true
             @emit "reachable", @_reachable
           clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(checkReachable, 3600000)
+          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
