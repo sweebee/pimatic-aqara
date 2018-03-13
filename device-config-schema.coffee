@@ -10,11 +10,15 @@ module.exports = {
         required: true
       resetTime:
         type: "integer"
-        default: 30000
+        default: 60000
       lux:
         description: "If your using V1 of this sensor, disable lux"
         type: "boolean"
         default: true
+      displaySparkline:
+        description: "Show the sparkline for the lux value"
+        type: "boolean"
+        default: false
   }
   AqaraDoorSensor: {
     title: "AqaraDoorSensor config options"

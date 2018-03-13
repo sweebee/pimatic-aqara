@@ -144,33 +144,35 @@ module.exports = (env) ->
               return device
           })
 
-    showDiscovered: (value) ->
+    showDiscovered: (device) ->
 
-      newdevice = not @framework.deviceManager.devicesConfig.some (device, iterator) =>
-        device.SID is value._sid
+      newdevice = not @framework.deviceManager.devicesConfig.some (result, iterator) =>
+        result.SID is device._sid
 
       if newdevice
-        deviceClass = false
-        switch value._type
+        config_options = {}
+        switch device._type
           when 'switch'
-            deviceClass = 'AqaraWirelessSwitch'
+            config_options.class = 'AqaraWirelessSwitch'
           when 'button'
-            deviceClass = 'AqaraWirelessButton'
+            config_options.class = 'AqaraWirelessButton'
           when 'leak'
-            deviceClass = 'AqaraLeakSensor'
+            config_options.class = 'AqaraLeakSensor'
           when 'motion'
-            deviceClass = 'AqaraMotionSensor'
+            config_options.class = 'AqaraMotionSensor'
+            if not device._lux
+              config_options.lux = false
           when 'magnet'
-            deviceClass = 'AqaraDoorSensor'
+            config_options.class = 'AqaraDoorSensor'
           when 'sensor'
-            deviceClass = 'AqaraTemperatureSensor'
+            config_options.class = 'AqaraTemperatureSensor'
+            if not device._pressure
+              config_options.pressure = false
 
-        if deviceClass
+        if config_options.class
+          config_options.SID = device._sid
           @framework.deviceManager.discoveredDevice(
-            'pimatic-aqara', "#{deviceClass}", {
-              SID: value._sid,
-              class: deviceClass
-            }
+            'pimatic-aqara', "#{config_options.class}", config_options
           )
 
     clearDiscovery: ->
@@ -213,7 +215,7 @@ module.exports = (env) ->
         @addAttribute('lux', {
           description: "Lux",
           type: "number"
-          displaySparkline: false
+          displaySparkline: @config.displaySparkline
           unit: "lux"
         })
         @['lux'] = ()-> Promise.resolve(@_lux)
