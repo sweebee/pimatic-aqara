@@ -100,9 +100,10 @@ var Gateway = function (_events$EventEmitter) {
           if (sid === this._sid) {
             // self
             this._handleState(state);
-
-            this._ready = true;
-            this.emit('ready');
+            if(! this._ready) {
+                this._ready = true;
+                this.emit('ready');
+            }
           } else {
             var subdevice = void 0;
             switch (type) {
