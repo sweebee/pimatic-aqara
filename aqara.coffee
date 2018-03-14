@@ -149,7 +149,6 @@ module.exports = (env) ->
       @_battery = lastState?.battery?.value
       if @config.lux
         @_lux = lastState?.lux?.value
-      @_reachable = lastState?.reachable?.value or true
 
       @addAttribute('battery', {
         description: "Battery",
@@ -184,17 +183,6 @@ module.exports = (env) ->
         @_setPresence(no)
       )
 
-      @attributes.reachable = {
-        description: "If the device is reachable"
-        type: "boolean"
-        hidden: true
-      }
-
-      resetReachable = ( =>
-        @_reachable = false
-        @emit "reachable", @_reachable
-      )
-
       # Report handler
       @reportHandler = ( (result) =>
 
@@ -217,13 +205,6 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Update the reachability
-          unless @_reachable
-            @_reachable = true
-            @emit "reachable", @_reachable
-          clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780000)
-
       )
 
       # Listen for device reports
@@ -239,8 +220,6 @@ module.exports = (env) ->
     getPresence: -> Promise.resolve @_presence
     getBattery: -> Promise.resolve @_battery
     getLux: -> Promise.resolve @_lux
-    getReachable: -> Promise.resolve @_reachable
-
 
   class AqaraDoorSensor extends env.devices.ContactSensor
 
@@ -249,7 +228,6 @@ module.exports = (env) ->
       @name = @config.name
       @_contact = lastState?.contact?.value or false
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value or true
 
       @addAttribute('battery', {
         description: "Battery",
@@ -270,17 +248,6 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
-      @attributes.reachable = {
-        description: "If the device is reachable"
-        type: "boolean"
-        hidden: true
-      }
-
-      resetReachable = ( =>
-        @_reachable = false
-        @emit "reachable", @_reachable
-      )
-
       # Report handler
       @reportHandler = ( (result) =>
 
@@ -295,13 +262,6 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Update the reachability
-          unless @_reachable
-            @_reachable = true
-            @emit "reachable", @_reachable
-          clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780000)
-
       )
 
       # Listen for device reports
@@ -315,7 +275,6 @@ module.exports = (env) ->
 
     getContact: -> Promise.resolve @_contact
     getBattery: -> Promise.resolve @_battery
-    getReachable: -> Promise.resolve @_reachable
 
   class AqaraLeakSensor extends env.devices.Device
 
@@ -324,7 +283,6 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value or false
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value or true
 
       @attributes = {}
 
@@ -352,17 +310,6 @@ module.exports = (env) ->
         labels: [@config.wet, @config.dry]
       }
 
-      @attributes.reachable = {
-        description: "If the device is reachable"
-        type: "boolean"
-        hidden: true
-      }
-
-      resetReachable = ( =>
-        @_reachable = false
-        @emit "reachable", @_reachable
-      )
-
       # Report handler
       @reportHandler = ( (result) =>
 
@@ -378,12 +325,6 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Update the reachability
-          unless @_reachable
-            @_reachable = true
-            @emit "reachable", @_reachable
-          clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780000)
       )
 
       # Listen for device reports
@@ -397,7 +338,6 @@ module.exports = (env) ->
 
     getState: -> Promise.resolve @_state
     getBattery: -> Promise.resolve @_battery
-    getReachable: -> Promise.resolve @_reachable
 
   class AqaraWirelessSwitch extends env.devices.PowerSwitch
 
@@ -406,7 +346,6 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value or false
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value or true
 
       @addAttribute('battery', {
         description: "Battery",
@@ -427,17 +366,6 @@ module.exports = (env) ->
       })
       @['battery'] = ()-> Promise.resolve(@_battery)
 
-      @attributes.reachable = {
-        description: "If the device is reachable"
-        type: "boolean"
-        hidden: true
-      }
-
-      resetReachable = ( =>
-        @_reachable = false
-        @emit "reachable", @_reachable
-      )
-
       # Report handler
       @reportHandler = ( (result) =>
 
@@ -450,13 +378,6 @@ module.exports = (env) ->
           # Update the battery value
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
-
-          # Update the reachability
-          unless @_reachable
-            @_reachable = true
-            @emit "reachable", @_reachable
-          clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780000)
 
       )
 
@@ -475,7 +396,6 @@ module.exports = (env) ->
 
     getSate: -> Promise.resolve @_state
     getBattery: -> Promise.resolve @_battery
-    getReachable: -> Promise.resolve @_reachable
 
   class AqaraWirelessButton extends env.devices.Device
 
@@ -484,7 +404,7 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value or true
+      
       @attributes = {}
 
       @attributes.battery = {
@@ -516,17 +436,6 @@ module.exports = (env) ->
         @emit "state", @_state
       )
 
-      @attributes.reachable = {
-        description: "If the device is reachable"
-        type: "boolean"
-        hidden: true
-      }
-
-      resetReachable = ( =>
-        @_reachable = false
-        @emit "reachable", @_reachable
-      )
-
       # Report handler
       @reportHandler = ( (result) =>
 
@@ -543,13 +452,6 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Update the reachability
-          unless @_reachable
-            @_reachable = true
-            @emit "reachable", @_reachable
-          clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780000)
-
       )
 
       # Listen for device reports
@@ -563,7 +465,6 @@ module.exports = (env) ->
 
     getState: -> Promise.resolve @_state
     getBattery: -> Promise.resolve @_battery
-    getReachable: -> Promise.resolve @_reachable
 
   class AqaraTemperatureSensor extends env.devices.Device
 
@@ -575,7 +476,7 @@ module.exports = (env) ->
       if @config.pressure
         @_pressure = lastState?.pressure?.value
       @_battery = lastState?.battery?.value
-      @_reachable = lastState?.reachable?.value or true
+      
       @attributes = {}
 
       @attributes.battery = {
@@ -618,17 +519,6 @@ module.exports = (env) ->
           acronym: 'P'
         }
 
-      @attributes.reachable = {
-        description: "If the device is reachable"
-        type: "boolean"
-        hidden: true
-      }
-
-      resetReachable = ( =>
-        @_reachable = false
-        @emit "reachable", @_reachable
-      )
-
       # Report handler
       @reportHandler = ( (result) =>
 
@@ -651,13 +541,6 @@ module.exports = (env) ->
           @_battery = result.getBatteryPercentage()
           @emit "battery", @_battery
 
-          # Update the reachability
-          unless @_reachable
-            @_reachable = true
-            @emit "reachable", @_reachable
-          clearTimeout(@_reachableTimer)
-          @_reachableTimer = setTimeout(resetReachable, 3780000)
-
       )
 
       # Listen for device reports
@@ -673,7 +556,6 @@ module.exports = (env) ->
     getHumidity: -> Promise.resolve @_humidity
     getPressure: -> Promise.resolve @_pressure
     getBattery: -> Promise.resolve @_battery
-    getReachable: -> Promise.resolve @_reachable
 
   aqara = new aqara
 
