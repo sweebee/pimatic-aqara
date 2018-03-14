@@ -30,11 +30,7 @@ module.exports = (env) ->
           env.logger.warn('Gateway not reachable')
         )
 
-        #heartbeat test
-        gateway.on('heartbeat'), (msg) =>
-         env.logger.debug('Heartbeat received')
-         env.logger.debug(msg)
-
+        # Receiving subdevices
         gateway.on('subdevice', (device) =>
           if not @devices[device.getSid()]?
               @emit "discovered", device
@@ -208,8 +204,9 @@ module.exports = (env) ->
           if(result.stateUpdated())
             unless @_presence is result.isPresent()
               @_setPresence(result.isPresent())
-            clearTimeout(@_resetPresenceTimeout)
-            @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
+            if @config.autoReset
+              clearTimeout(@_resetPresenceTimeout)
+              @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
           # Update lux value
           if @config.lux and result.getLux() != null

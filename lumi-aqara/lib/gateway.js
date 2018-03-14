@@ -151,7 +151,6 @@ var Gateway = function (_events$EventEmitter) {
           else {
               var _subdevice = this._subdevices.get(msg.sid);
               if (_subdevice) {
-                  this.emit('heartbeat', msg);
                   _subdevice._handleState(state);
               } else {
                   // console.log('did not manage to find device, or device not yet supported')

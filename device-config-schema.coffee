@@ -8,6 +8,10 @@ module.exports = {
       SID:
         type: "string"
         required: true
+      autoReset:
+        description: "By default the sensor resets after 120s, if this takes to long for your, enable autoreset"
+        type: "boolean"
+        default: true
       resetTime:
         type: "integer"
         default: 60000
