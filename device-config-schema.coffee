@@ -6,17 +6,18 @@ module.exports = {
     extensions: ["xPresentLabel", "xAbsentLabel"]
     properties:
       SID:
+        description: "The unique SID for this device"
         type: "string"
         required: true
       autoReset:
-        description: "By default the sensor resets after 120s, if this takes to long for your, enable autoreset"
+        description: "By default the sensor resets after 120s, if this takes to long for you, enable autoreset"
         type: "boolean"
         default: true
       resetTime:
         type: "integer"
         default: 60000
       lux:
-        description: "If your using V1 of this sensor, disable lux"
+        description: "If you're using V1 of this sensor, disable lux"
         type: "boolean"
         default: true
       displaySparkline:
@@ -30,6 +31,7 @@ module.exports = {
     extensions: ["xClosedLabel", "xOpenedLabel"]
     properties:
       SID:
+        description: "The unique SID for this device"
         type: "string"
         required: true
   }
@@ -38,12 +40,15 @@ module.exports = {
     type: "object"
     properties:
       SID:
+        description: "The unique SID for this device"
         type: "string"
         required: true
       wet:
+        description: "Label when the sensor is wet"
         type: "string"
         default: "wet"
       dry:
+        description: "Label when the sensor is dry"
         type: "string"
         default: "dry"
   }
@@ -52,17 +57,20 @@ module.exports = {
     type: "object"
     properties:
       SID:
+        description: "The unique SID for this device"
         type: "string"
         required: true
   }
   AqaraWirelessButton: {
-    title: "AqaraWirelessSwitch config options"
+    title: "AqaraWirelessButton config options"
     type: "object"
     properties:
       SID:
+        description: "The unique SID for this device"
         type: "string"
         required: true
       resetTime:
+        description: "The time the device resets to waiting state"
         type: "integer"
         default: 100
   }
@@ -71,10 +79,11 @@ module.exports = {
     type: "object"
     properties:
       SID:
+        description: "The unique SID for this device"
         type: "string"
         required: true
       pressure:
-        description: "If your using V1 of this sensor, disable pressure"
+        description: "If you're using V1 of this sensor, disable pressure"
         type: "boolean"
         default: true
   }
