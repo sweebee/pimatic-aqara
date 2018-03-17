@@ -49,19 +49,32 @@ var Subdevice = function (_events$EventEmitter) {
             this._action = false;
             // Save the battery voltage
             if (typeof data.voltage !== 'undefined') this._voltage = data.voltage;
+
             // Save the lux value for sensors with a lux sensor
             if (typeof data.lux !== 'undefined') this._lux = data.lux;
+
             // If no motion
             if (typeof data.no_motion !== 'undefined'){
                 this._action = true;
                 this._state = false;
-            };
+            }
+
             // If rotating cube
             if (typeof data.rotate !== 'undefined'){
                 this._state = 'rotate';
                 this._rotateDegrees = data.rotate;
                 this._action = true;
             }
+
+            // Get temperature
+            if (typeof data.temperature !== 'undefined') this._temperature = data.temperature / 100;
+
+            // Get pressure
+            if (typeof data.humidity !== 'undefined') this._humidity = data.humidity / 100;
+
+            // Get pressure
+            if (typeof data.pressure !== 'undefined') this._pressure = data.pressure / 100;
+
             // If receiving a status
             if (typeof data.status !== 'undefined' && data.status !== 'iam'){
                 this._action = true;
