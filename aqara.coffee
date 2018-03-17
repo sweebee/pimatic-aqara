@@ -533,7 +533,7 @@ module.exports = (env) ->
           @emit "humidity", @_humidity
 
           # Update the pressure value
-          if @config.pressure
+          if @config.pressure and result.getPressure() != null
             @_pressure = parseFloat(result.getPressure())
             @emit "pressure", @_pressure
 
