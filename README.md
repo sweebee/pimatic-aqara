@@ -20,7 +20,7 @@ For controlling and receiving events from the Aqara (Xiaomi) Gateway.
 *( Feel free to donate one ;) )*
 
 #### Setup
-The Gateway must be in developer mode, when setting to developer mode you will also receive an password, save it because you need it to add the plugin.
+The Gateway must be in developer mode, when setting to developer mode you will also receive a password, save it because you need it to add the plugin.
 
 Just install the plugin from the plugin page within pimatic, enable it and enter the password you received from the gateway by setting it in developer mode.
 
