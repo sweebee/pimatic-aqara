@@ -443,7 +443,7 @@ module.exports = (env) ->
 
           # Check if the button is pressed
           if result.stateUpdated()
-            @_state = result.state
+            @_state = result.getState()
             @emit "state", @_state
             clearTimeout(@_resetStateTimeout)
             @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
