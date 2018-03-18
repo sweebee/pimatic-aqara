@@ -404,7 +404,7 @@ module.exports = (env) ->
       @name = @config.name
       @_state = lastState?.state?.value
       @_battery = lastState?.battery?.value
-      
+
       @attributes = {}
 
       @attributes.battery = {
@@ -476,7 +476,7 @@ module.exports = (env) ->
       if @config.pressure
         @_pressure = lastState?.pressure?.value
       @_battery = lastState?.battery?.value
-      
+
       @attributes = {}
 
       @attributes.battery = {
@@ -546,12 +546,12 @@ module.exports = (env) ->
       )
 
       # Listen for device reports
-      @board.on("sensor", @reportHandler)
+      @board.on("report", @reportHandler)
 
       super()
 
     destroy: ->
-      @board.removeListener "sensor", @reportHandler
+      @board.removeListener "report", @reportHandler
       super()
 
     getTemperature: -> Promise.resolve @_temperature
