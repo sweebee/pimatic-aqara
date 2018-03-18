@@ -525,12 +525,14 @@ module.exports = (env) ->
         if result.getSid() is @config.SID and result.getType() == 'temperature'
 
           # Update the temperature value
-          @_temperature = parseFloat(result.getTemperature())
-          @emit "temperature", @_temperature
+          if result.getTemperature() > -20 and result.getTemperature() < 60
+            @_temperature = parseFloat(result.getTemperature())
+            @emit "temperature", @_temperature
 
           # Update the humidity value
-          @_humidity = parseFloat(result.getHumidity())
-          @emit "humidity", @_humidity
+          if result.getHumidity() > 0 and result.getHumidity() <= 100
+            @_humidity = parseFloat(result.getHumidity())
+            @emit "humidity", @_humidity
 
           # Update the pressure value
           if @config.pressure and result.getPressure() != null
