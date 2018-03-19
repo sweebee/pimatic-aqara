@@ -98,8 +98,8 @@ module.exports = (env) ->
         do (Cl) =>
           @framework.deviceManager.registerDeviceClass(Cl.name, {
             configDef: deviceConfigDef[Cl.name]
-            createCallback: (config,lastState) =>
-              device  =  new Cl(config, lastState, @board)
+            createCallback: (config, lastState) =>
+              device  =  new Cl(config, lastState, @board, @config)
               return device
           })
 
@@ -142,7 +142,7 @@ module.exports = (env) ->
 
   class AqaraMotionSensor extends env.devices.PresenceSensor
 
-    constructor: (@config, lastState, @board) ->
+    constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
       @name = @config.name
       @_presence = lastState?.presence?.value or false
@@ -202,7 +202,7 @@ module.exports = (env) ->
             @emit "lux", @_lux
 
           # Update battery value
-          @_battery = result.getBatteryPercentage()
+          @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
           @emit "battery", @_battery
 
       )
@@ -223,7 +223,7 @@ module.exports = (env) ->
 
   class AqaraDoorSensor extends env.devices.ContactSensor
 
-    constructor: (@config, lastState, @board) ->
+    constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
       @name = @config.name
       @_contact = lastState?.contact?.value or false
@@ -259,7 +259,7 @@ module.exports = (env) ->
               @_setContact(result.isOpen())
 
           # Update the battery value
-          @_battery = result.getBatteryPercentage()
+          @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
           @emit "battery", @_battery
 
       )
@@ -278,7 +278,7 @@ module.exports = (env) ->
 
   class AqaraLeakSensor extends env.devices.Device
 
-    constructor: (@config, lastState, @board) ->
+    constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
       @name = @config.name
       @_state = lastState?.state?.value or false
@@ -322,7 +322,7 @@ module.exports = (env) ->
               @emit "state", @_state
 
           # Update the battery value
-          @_battery = result.getBatteryPercentage()
+          @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
           @emit "battery", @_battery
 
       )
@@ -341,7 +341,7 @@ module.exports = (env) ->
 
   class AqaraWirelessSwitch extends env.devices.PowerSwitch
 
-    constructor: (@config, lastState, @board) ->
+    constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
       @name = @config.name
       @_state = lastState?.state?.value or false
@@ -376,7 +376,7 @@ module.exports = (env) ->
             @_setState(!@_state)
 
           # Update the battery value
-          @_battery = result.getBatteryPercentage()
+          @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
           @emit "battery", @_battery
 
       )
@@ -399,7 +399,7 @@ module.exports = (env) ->
 
   class AqaraWirelessButton extends env.devices.Device
 
-    constructor: (@config, lastState, @board) ->
+    constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
       @name = @config.name
       @_state = lastState?.state?.value
@@ -449,7 +449,7 @@ module.exports = (env) ->
             @_resetStateTimeout = setTimeout(resetState, @config.resetTime)
 
           # Update the battery value
-          @_battery = result.getBatteryPercentage()
+          @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
           @emit "battery", @_battery
 
       )
@@ -468,7 +468,7 @@ module.exports = (env) ->
 
   class AqaraTemperatureSensor extends env.devices.Device
 
-    constructor: (@config, lastState, @board) ->
+    constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
       @name = @config.name
       @_temperature = lastState?.temperature?.value
@@ -540,7 +540,7 @@ module.exports = (env) ->
             @emit "pressure", @_pressure
 
           # Update the battery value
-          @_battery = result.getBatteryPercentage()
+          @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
           @emit "battery", @_battery
 
       )

@@ -10,9 +10,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var events = require('events');
 
-var _require = require('../constants'),
-    SUBDEVICE_MIN_VOLT = _require.SUBDEVICE_MIN_VOLT,
-    SUBDEVICE_MAX_VOLT = _require.SUBDEVICE_MAX_VOLT;
+var _require = require('../constants');
 
 var Subdevice = function (_events$EventEmitter) {
     _inherits(Subdevice, _events$EventEmitter);
@@ -166,8 +164,8 @@ var Subdevice = function (_events$EventEmitter) {
         }
     }, {
         key: 'getBatteryPercentage',
-        value: function getBatteryPercentage() {
-            var perc = 100 - Math.round((SUBDEVICE_MAX_VOLT - this._voltage) / (SUBDEVICE_MAX_VOLT - SUBDEVICE_MIN_VOLT) * 100);
+        value: function getBatteryPercentage(min_volt, max_volt) {
+            var perc = 100 - Math.round((max_volt - this._voltage) / (max_volt - min_volt) * 100);
             return Math.min(Math.max(perc, 0), 100);
         }
     }]);
