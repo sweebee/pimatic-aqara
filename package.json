@@ -1,7 +1,7 @@
 {
   "name": "pimatic-aqara",
   "description": "Interact with the Aqara (Xiaomi) gateway",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "author": "Wiebe Nieuwenhuis <info@wiebenieuwenhuis.nl> (http://wiebenieuwenhuis.nl)",
   "main": "aqara",
   "icon": "icon.svg",
