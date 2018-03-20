@@ -123,7 +123,7 @@ module.exports = (env) ->
               config_options.lux = false
           when 'magnet'
             config_options.class = 'AqaraDoorSensor'
-          when 'sensor'
+          when 'temperature'
             config_options.class = 'AqaraTemperatureSensor'
             if not device.getPressure()
               config_options.pressure = false

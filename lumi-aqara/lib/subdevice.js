@@ -66,15 +66,12 @@ var Subdevice = function (_events$EventEmitter) {
 
             // Get temperature
             if (typeof data.temperature !== 'undefined') this._temperature = data.temperature / 100;
-            if (typeof data._temperature !== 'undefined') this._temperature = data._temperature; // This is for v1 sensors
 
             // Get humidity
             if (typeof data.humidity !== 'undefined') this._humidity = data.humidity / 100;
-            if (typeof data._humidity !== 'undefined') this._humidity = data._humidity; // This is for v1 sensors
 
             // Get pressure
             if (typeof data.pressure !== 'undefined') this._pressure = data.pressure / 100;
-            if (typeof data._pressure !== 'undefined') this._pressure = data._pressure; // This is for v1 sensors
 
 
             // If receiving a status
