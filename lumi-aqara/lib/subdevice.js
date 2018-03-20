@@ -65,13 +65,13 @@ var Subdevice = function (_events$EventEmitter) {
             }
 
             // Get temperature
-            if (typeof data.temperature !== 'undefined') this._temperature = data.temperature / 100;
+            if (typeof data.temperature !== 'undefined') this._temperature = Math.round(data.temperature / 10) / 10;
 
             // Get humidity
-            if (typeof data.humidity !== 'undefined') this._humidity = data.humidity / 100;
+            if (typeof data.humidity !== 'undefined') this._humidity = Math.round(data.humidity / 10) / 10;
 
             // Get pressure
-            if (typeof data.pressure !== 'undefined') this._pressure = data.pressure / 100;
+            if (typeof data.pressure !== 'undefined') this._pressure = Math.round(data.pressure / 100) / 10;
 
 
             // If receiving a status
