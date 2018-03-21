@@ -87,4 +87,13 @@ module.exports = {
         type: "boolean"
         default: true
   }
+  AqaraMagicCube: {
+    title: "AqaraMagicCube config options"
+    type: "object"
+    properties:
+      SID:
+        description: "The unique SID for this device"
+        type: "string"
+        required: true
+  }
 }

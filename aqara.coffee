@@ -33,7 +33,7 @@ module.exports = (env) ->
         # Receiving subdevices
         gateway.on('subdevice', (device) =>
           if not @devices[device.getSid()]?
-              @emit "discovered", device
+            @emit "discovered", device
           @devices[device.getSid()] = device
           device.on('report', () =>
             env.logger.debug(device)
@@ -91,7 +91,8 @@ module.exports = (env) ->
         AqaraLeakSensor,
         AqaraWirelessSwitch,
         AqaraWirelessButton,
-        AqaraTemperatureSensor
+        AqaraTemperatureSensor,
+        AqaraMagicCube
       ]
 
       for Cl in deviceClasses
@@ -127,6 +128,8 @@ module.exports = (env) ->
             config_options.class = 'AqaraTemperatureSensor'
             if not device.getPressure()
               config_options.pressure = false
+          when 'cube'
+            config_options.class = 'AqaraMagicCube'
 
         if config_options.class
           config_options.SID = device.getSid()
@@ -557,6 +560,78 @@ module.exports = (env) ->
     getTemperature: -> Promise.resolve @_temperature
     getHumidity: -> Promise.resolve @_humidity
     getPressure: -> Promise.resolve @_pressure
+    getBattery: -> Promise.resolve @_battery
+
+
+  class AqaraMagicCube extends env.devices.Device
+
+    constructor: (@config, lastState, @board, @baseConfig) ->
+      @id = @config.id
+      @name = @config.name
+      @_state = lastState?.state?.value
+      @_rotation = lastState?.rotation?.value or 0
+      @_battery = lastState?.battery?.value
+
+      @attributes = {}
+
+      @attributes.battery = {
+        description: "Battery",
+        type: "number"
+        displaySparkline: false
+        unit: "%"
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-empty': 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 100]
+            'icon-battery-filled': 100
+          }
+      }
+
+      @attributes.rotation = {
+        description: "Rotation of the cube"
+        type: "number"
+        displaySparkline: false
+      }
+
+      @attributes.state = {
+        description: "State of the cube"
+        type: "string"
+      }
+
+      # Report handler
+      @reportHandler = ( (result) =>
+
+        if result.getSid() is @config.SID and result.getType() is "cube"
+
+          # Check if something happened to the cube
+          if result.stateUpdated()
+            @_state = result.getState()
+            @emit "state", @_state
+            @_rotation = result.getRotation()
+            @emit "rotation", @_rotation
+
+          # Update the battery value
+          @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
+          @emit "battery", @_battery
+
+      )
+
+      # Listen for device reports
+      @board.on("report", @reportHandler)
+
+      super()
+
+    destroy: ->
+      @board.removeListener "report", @reportHandler
+      super()
+
+    getState: -> Promise.resolve @_state
+    getRotation: -> Promise.resolve @_rotation
     getBattery: -> Promise.resolve @_battery
 
   aqara = new aqara

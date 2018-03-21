@@ -36,7 +36,7 @@ var Subdevice = function (_events$EventEmitter) {
             _this._humidity = null;
         }
         if(_this._type === 'cube') {
-            _this._rotateDegrees = null;
+            _this._rotateDegrees = 0;
         }
         return _this;
     }
@@ -60,8 +60,10 @@ var Subdevice = function (_events$EventEmitter) {
             // If rotating cube
             if (typeof data.rotate !== 'undefined'){
                 this._state = 'rotate';
-                this._rotateDegrees = data.rotate;
+                this._rotateDegrees = parseInt(Math.round(data.rotate.replace(',','.')));
                 this._action = true;
+            } else {
+                this._rotateDegrees = 0;
             }
 
             // Get temperature
@@ -162,6 +164,11 @@ var Subdevice = function (_events$EventEmitter) {
         key: 'getLux',
         value: function getLux() {
             return this._lux;
+        }
+    }, {
+        key: 'getRotation',
+        value: function getRotation() {
+            return this._rotateDegrees;
         }
     }, {
         key: 'getBatteryPercentage',
