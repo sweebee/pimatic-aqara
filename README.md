@@ -11,11 +11,11 @@ For controlling and receiving events from the Aqara (Xiaomi) Gateway.
 - Aqara Smart Wireless Switch (click / longpress / doublepress)
 - Aqara Water/Leak Sensor (dry / wet)
 - Aqara Temperature/Humidity/Pressure sensor
+- Aqara magic cube
 
 ##### Not (yet) supported
  - Aqara Smart Lock
  - Aqara Curtain motor
- - Aqara magic cube
  
 *( Feel free to donate one ;) )*
 
