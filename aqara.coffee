@@ -193,8 +193,7 @@ module.exports = (env) ->
 
           # Update presence
           if(result.stateUpdated())
-            unless @_presence is result.isPresent()
-              @_setPresence(result.isPresent())
+            @_setPresence(result.isPresent())
             if @config.autoReset
               clearTimeout(@_resetPresenceTimeout)
               @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
@@ -224,7 +223,7 @@ module.exports = (env) ->
     getBattery: -> Promise.resolve @_battery
     getLux: -> Promise.resolve @_lux
 
-  class AqaraDoorSensor extends env.devices.ContactSensor
+  class AqaraDoorSensor extends env.devices.Sensor
 
     constructor: (@config, lastState, @board, @baseConfig) ->
       @id = @config.id
@@ -232,7 +231,9 @@ module.exports = (env) ->
       @_contact = lastState?.contact?.value or false
       @_battery = lastState?.battery?.value
 
-      @addAttribute('battery', {
+      @attributes = {}
+
+      @attributes.battery = {
         description: "Battery",
         type: "number"
         displaySparkline: false
@@ -248,8 +249,13 @@ module.exports = (env) ->
             'icon-battery-fuel-5': [80, 100]
             'icon-battery-filled': 100
           }
-      })
-      @['battery'] = ()-> Promise.resolve(@_battery)
+      }
+
+      @attributes.contact = {
+        description: "State of the contact"
+        type: "boolean"
+        labels: ['closed', 'opened']
+      }
 
       # Report handler
       @reportHandler = ( (result) =>
@@ -258,8 +264,7 @@ module.exports = (env) ->
 
           # Update the door/window state
           if result.stateUpdated()
-            unless @_contact is result.isOpen()
-              @_setContact(result.isOpen())
+            @_setContact(!result.isOpen())
 
           # Update the battery value
           @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
@@ -271,6 +276,11 @@ module.exports = (env) ->
       @board.on("report", @reportHandler)
 
       super()
+
+    _setContact: (value) ->
+      if @_contact is value then return
+      @_contact = value
+      @emit 'contact', value
 
     destroy: ->
       @board.removeListener "report", @reportHandler
@@ -320,9 +330,7 @@ module.exports = (env) ->
 
           # Check the leak status
           if result.stateUpdated()
-            unless @_state is result.isLeaking()
-              @_state = result.isLeaking()
-              @emit "state", @_state
+            @_setState(result.isLeaking())
 
           # Update the battery value
           @_battery = @_battery = result.getBatteryPercentage(@baseConfig.batteryMin, @baseConfig.batteryMax)
@@ -334,6 +342,11 @@ module.exports = (env) ->
       @board.on("report", @reportHandler)
 
       super()
+
+    _setState: (state) ->
+      if @_state is state then return
+      @_state = state
+      @emit "state", state
 
     destroy: ->
       @board.removeListener "report", @reportHandler
