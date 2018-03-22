@@ -121,13 +121,13 @@ module.exports = (env) ->
           when 'motion'
             config_options.class = 'AqaraMotionSensor'
             if not device.getLux()
-              config_options.lux = false
+              config_options.showLux = false
           when 'magnet'
             config_options.class = 'AqaraDoorSensor'
           when 'temperature'
             config_options.class = 'AqaraTemperatureSensor'
             if not device.getPressure()
-              config_options.pressure = false
+              config_options.showPressure = false
           when 'cube'
             config_options.class = 'AqaraMagicCube'
 
@@ -150,7 +150,7 @@ module.exports = (env) ->
       @name = @config.name
       @_presence = lastState?.presence?.value or false
       @_battery = lastState?.battery?.value
-      if @config.lux
+      if @config.showLux
         @_lux = lastState?.lux?.value
 
       @addAttribute('battery', {
@@ -173,7 +173,7 @@ module.exports = (env) ->
       @['battery'] = ()-> Promise.resolve(@_battery)
 
       # If lux is enabled, add it
-      if @config.lux
+      if @config.showLux
         @addAttribute('lux', {
           description: "Lux",
           type: "number"
@@ -199,7 +199,7 @@ module.exports = (env) ->
               @_resetPresenceTimeout = setTimeout(resetPresence, @config.resetTime)
 
           # Update lux value
-          if @config.lux and result.getLux() != null
+          if @config.showLux and result.getLux() != null
             @_lux = parseInt(result.getLux())
             @emit "lux", @_lux
 
@@ -488,8 +488,9 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_temperature = lastState?.temperature?.value
-      @_humidity = lastState?.humidity?.value
-      if @config.pressure
+      if @config.showHumidity
+        @_humidity = lastState?.humidity?.value
+      if @config.showPressure
         @_pressure = lastState?.pressure?.value
       @_battery = lastState?.battery?.value
 
@@ -520,14 +521,15 @@ module.exports = (env) ->
         acronym: 'T'
       }
 
-      @attributes.humidity = {
-        description: "the measured humidity"
-        type: "number"
-        unit: '%'
-        acronym: 'H'
-      }
+      if @config.showHumidity
+        @attributes.humidity = {
+          description: "the measured humidity"
+          type: "number"
+          unit: '%'
+          acronym: 'H'
+        }
 
-      if @config.pressure
+      if @config.showPressure
         @attributes.pressure = {
           description: "the measured pressure"
           type: "number"
@@ -546,12 +548,13 @@ module.exports = (env) ->
             @emit "temperature", @_temperature
 
           # Update the humidity value
-          if result.getHumidity() > 0 and result.getHumidity() <= 100
-            @_humidity = parseFloat(result.getHumidity())
-            @emit "humidity", @_humidity
+          if @config.showHumidity
+            if result.getHumidity() > 0 and result.getHumidity() <= 100
+              @_humidity = parseFloat(result.getHumidity())
+              @emit "humidity", @_humidity
 
           # Update the pressure value
-          if @config.pressure and result.getPressure() != null
+          if @config.showPressure and result.getPressure() != null
             @_pressure = parseFloat(result.getPressure())
             @emit "pressure", @_pressure
 

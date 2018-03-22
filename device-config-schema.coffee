@@ -16,7 +16,7 @@ module.exports = {
       resetTime:
         type: "integer"
         default: 60000
-      lux:
+      showLux:
         description: "If you're using V1 of this sensor, disable lux"
         type: "boolean"
         default: true
@@ -86,7 +86,11 @@ module.exports = {
         description: "The unique SID for this device"
         type: "string"
         required: true
-      pressure:
+      showHumidity:
+        description: "If you don't need the humidity, hide it"
+        type: "boolean"
+        default: true
+      showPressure:
         description: "If you're using V1 of this sensor, disable pressure"
         type: "boolean"
         default: true
