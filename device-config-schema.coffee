@@ -73,6 +73,10 @@ module.exports = {
         description: "The time the device resets to waiting state"
         type: "integer"
         default: 100
+      waitingState:
+        descrioption: "The label for the waiting state"
+        type: "string"
+        default: "Waiting..."
   }
   AqaraTemperatureSensor: {
     title: "AqaraTemperatureSensor config options"

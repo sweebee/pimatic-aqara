@@ -435,7 +435,7 @@ module.exports = (env) ->
 
       # Reset the state
       resetState = ( =>
-        @_state = 'waiting...'
+        @_state = @config.waitingState
         @emit "state", @_state
       )
 
