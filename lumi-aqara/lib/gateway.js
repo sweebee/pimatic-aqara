@@ -58,6 +58,7 @@ var Gateway = function (_events$EventEmitter) {
       var sid = void 0;
       var type = void 0;
       var state = void 0;
+
       switch (msg.cmd) {
         case 'get_id_list_ack':
           this._refreshKey(msg.token);
@@ -116,6 +117,7 @@ var Gateway = function (_events$EventEmitter) {
                 break;
               case 'switch':
               case 'sensor_switch.aq2':
+              case '86sw2':
                 subdevice = new Subdevice({ sid, type: 'button' });
                 break;
               case 'motion':

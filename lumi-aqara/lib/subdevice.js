@@ -44,6 +44,7 @@ var Subdevice = function (_events$EventEmitter) {
     _createClass(Subdevice, [{
         key: '_handleState',
         value: function _handleState(data) {
+
             this._action = false;
             // Save the battery voltage
             if (typeof data.voltage !== 'undefined') this._voltage = data.voltage;
@@ -63,7 +64,9 @@ var Subdevice = function (_events$EventEmitter) {
                 this._rotateDegrees = parseInt(Math.round(data.rotate.replace(',','.')));
                 this._action = true;
             } else {
-                this._rotateDegrees = 0;
+                if(typeof this._rotateDegrees !== 'undefined') {
+                    this._rotateDegrees = 0;
+                }
             }
 
             // Get temperature
@@ -99,7 +102,17 @@ var Subdevice = function (_events$EventEmitter) {
             // If a switch
             if (typeof data.channel_0 !== 'undefined'){
                 this._action = true;
-                this._state = data.channel_0
+                this._state = 'left_click'
+            };
+
+            if (typeof data.channel_1 !== 'undefined'){
+                this._action = true;
+                this._state = 'right_click'
+            };
+
+            if (typeof data.dual_channel !== 'undefined'){
+                this._action = true;
+                this._state = 'both_click'
             };
 
             this.emit('report');
