@@ -132,6 +132,7 @@ var Gateway = function (_events$EventEmitter) {
                 subdevice = new Subdevice({ sid, type: 'leak' });
                 break;
               case 'cube':
+              case 'sensor_cube.aqgl01':
                 subdevice = new Subdevice({ sid, type: 'cube' });
                 break;
               default:
