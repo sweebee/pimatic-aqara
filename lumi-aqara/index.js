@@ -40,11 +40,14 @@ var Aqara = function (_events$EventEmitter) {
         var _iteratorError = undefined;
 
         try {
+          var i = 0;
           for (var _iterator = networkIface[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var connection = _step.value;
-
             if (connection.family === 'IPv4') {
-              _this._serverSocket.addMembership(MULTICAST_ADDRESS, connection.address);
+              if(i == 0){
+                _this._serverSocket.addMembership(MULTICAST_ADDRESS, connection.address);
+                i++;
+              }
             }
           }
         } catch (err) {
